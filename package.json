@@ -26,9 +26,6 @@
     "model-context-protocol"
   ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/hostkitpt/mcp/issues"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hostkitpt/mcp.git"
