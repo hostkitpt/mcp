@@ -1,0 +1,40 @@
+{
+  "name": "hostkit-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for the Hostkit API",
+  "homepage": "https://github.com/hostkitpt/mcp",
+  "type": "module",
+  "bin": {
+    "hostkit-mcp": "./src/server.mjs"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node src/server.mjs",
+    "check": "node --check src/server.mjs",
+    "prepack": "npm run check"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "hostkit",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hostkitpt/mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hostkitpt/mcp.git"
+  },
+  "funding": {
+    "type": "documentation",
+    "url": "https://hostkit.pt/api/"
+  }
+}
