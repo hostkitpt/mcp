@@ -2,15 +2,12 @@
 
 const API_KEY = process.env.HOSTKIT_API_KEY ?? "";
 const BASE_URL = (process.env.HOSTKIT_API_BASE_URL ?? "https://app.hostkit.pt/api").replace(/\/+$/, "");
-const RATE_LIMIT_MS = Number(process.env.HOSTKIT_RATE_LIMIT_MS ?? 600);
 const API_DOCS_URL = "https://hostkit.pt/api/";
 
 if (!API_KEY) {
   console.error("HOSTKIT_API_KEY is required");
   process.exit(1);
 }
-
-let nextRequestAt = 0;
 
 const textResult = (payload, isError = false) => ({
   content: [
@@ -366,8 +363,6 @@ async function hostkitGet(endpoint, params = {}) {
     throw new Error(`Invalid endpoint name: ${endpoint}`);
   }
 
-  await waitForRateLimit();
-
   const url = new URL(`${BASE_URL}/${endpoint}`);
   url.searchParams.set("APIKEY", API_KEY);
 
@@ -403,16 +398,6 @@ function parsePayload(text) {
     return JSON.parse(trimmed);
   } catch {
     return trimmed;
-  }
-}
-
-async function waitForRateLimit() {
-  const now = Date.now();
-  const delay = Math.max(0, nextRequestAt - now);
-  nextRequestAt = Math.max(now, nextRequestAt) + RATE_LIMIT_MS;
-
-  if (delay > 0) {
-    await new Promise((resolve) => setTimeout(resolve, delay));
   }
 }
 
