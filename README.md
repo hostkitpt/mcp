@@ -37,12 +37,6 @@ Or without npm:
 HOSTKIT_API_KEY="your-api-key" node src/server.mjs
 ```
 
-Optional environment variables:
-
-```bash
-HOSTKIT_API_BASE_URL="https://app.hostkit.pt/api"
-```
-
 The MCP exposes both read and write endpoints. Use API keys with the same care as direct Hostkit API access.
 
 ## MCP Client Config

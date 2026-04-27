@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const API_KEY = process.env.HOSTKIT_API_KEY ?? "";
-const BASE_URL = (process.env.HOSTKIT_API_BASE_URL ?? "https://app.hostkit.pt/api").replace(/\/+$/, "");
+const BASE_URL = "https://app.hostkit.pt/api";
 const API_DOCS_URL = "https://hostkit.pt/api/";
 
 if (!API_KEY) {
