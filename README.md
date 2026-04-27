@@ -10,7 +10,7 @@ The server talks to the public Hostkit API through:
 https://app.hostkit.pt/api/{endpoint}?APIKEY=...
 ```
 
-It uses a local request queue with a default 6 second interval, matching the documented 10 requests/minute API limit.
+It uses a local request queue with a default 600ms interval, matching the documented 100 requests/minute API limit.
 
 ## Requirements
 
@@ -39,7 +39,7 @@ Optional environment variables:
 
 ```bash
 HOSTKIT_API_BASE_URL="https://app.hostkit.pt/api"
-HOSTKIT_RATE_LIMIT_MS="6000"
+HOSTKIT_RATE_LIMIT_MS="600"
 ```
 
 The MCP exposes both read and write endpoints. Use API keys with the same care as direct Hostkit API access.

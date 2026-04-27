@@ -2,7 +2,7 @@
 
 const API_KEY = process.env.HOSTKIT_API_KEY ?? "";
 const BASE_URL = (process.env.HOSTKIT_API_BASE_URL ?? "https://app.hostkit.pt/api").replace(/\/+$/, "");
-const RATE_LIMIT_MS = Number(process.env.HOSTKIT_RATE_LIMIT_MS ?? 6000);
+const RATE_LIMIT_MS = Number(process.env.HOSTKIT_RATE_LIMIT_MS ?? 600);
 const API_DOCS_URL = "https://hostkit.pt/api/";
 
 if (!API_KEY) {
