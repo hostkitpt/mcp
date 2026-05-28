@@ -28,9 +28,7 @@ const numberOrStringSchema = (description) => ({
 const tools = [
   tool("hostkit_get_license", "Get Hostkit account license plan and expiration date.", {}),
   tool("hostkit_get_properties", "List all properties visible to the configured API key.", {}),
-  tool("hostkit_get_property", "Get details for one Hostkit property.", {
-    id: numberOrStringSchema("Ignored by the current Hostkit API; the API key selects the property."),
-  }),
+  tool("hostkit_get_property", "Get details for the property attached to the configured API key.", {}),
   tool("hostkit_get_reservations", "List reservations filtered by check-in, checkout, or reservation date.", {
     from_date: stringSchema("Check-in date in YYYY-MM-DD format."),
     to_date: stringSchema("Checkout date in YYYY-MM-DD format."),
@@ -455,8 +453,8 @@ function validateAlternativeArguments(toolName, args) {
     return validateNameArgs(args);
   }
 
-  if (toolName === "hostkit_get_reservations" && !args.from_date && !args.to_date && !args.reservation_date) {
-    return "Missing required argument: provide at least one of from_date, to_date or reservation_date";
+  if (toolName === "hostkit_get_reservations" && args.date_filter && !args.from_date && !args.to_date) {
+    return "Missing required argument: date_filter requires from_date or to_date";
   }
 
   if (toolName === "hostkit_remove_guest") {
