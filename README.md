@@ -1,6 +1,6 @@
 # Hostkit MCP
 
-MCP server for the Hostkit API.
+Local MCP distributed via GitHub for the Hostkit API.
 
 API documentation: https://hostkit.pt/api/
 
@@ -126,5 +126,5 @@ git push -u origin main
 ## Notes
 
 - Hostkit errors are returned as structured text content with `error`, `endpoint`, `status`, and `payload`.
-- The API key is never logged by this server.
-- The server intentionally does not expose a generic unrestricted endpoint caller.
+- The API key is never logged by this MCP.
+- This MCP intentionally does not expose a generic unrestricted endpoint caller.
