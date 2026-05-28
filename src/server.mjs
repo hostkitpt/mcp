@@ -70,6 +70,7 @@ const tools = [
     date_end: numberOrStringSchema("End date as Unix timestamp."),
     doc_type: stringSchema("Invoice type, for example FR or FT."),
     source: stringSchema("Invoice source."),
+    show_property: numberOrStringSchema("Set to 1 to include property_id and property_name in the response."),
   }),
   tool("hostkit_get_reservation_invoices", "List invoices for one reservation.", {
     rcode: stringSchema("Hostkit reservation code."),
