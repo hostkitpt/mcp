@@ -57,7 +57,7 @@ const tools = [
   }, ["rcode"]),
   tool("hostkit_get_keycode", "Get the smartlock keycode or invite code for one reservation.", {
     rcode: stringSchema("Hostkit reservation code."),
-    provider: { type: "string", enum: ["nuki", "homeit", "ttlock", "salto", "omnitec", "voyager", "tedee"] },
+    provider: { type: "string", enum: ["nuki", "homeit", "ttlock", "salto", "omnitec", "voyager", "tedee", "assa_abloy"] },
   }, ["rcode", "provider"]),
   tool("hostkit_get_invoices", "List invoices or filter a specific invoice.", {
     invoicing_nif: stringSchema("Invoicing VAT ID."),
@@ -451,6 +451,10 @@ function validateToolArguments(selectedTool, args) {
 function validateAlternativeArguments(toolName, args) {
   if (toolName === "hostkit_add_reservation" || toolName === "hostkit_add_guest") {
     return validateNameArgs(args);
+  }
+
+  if (toolName === "hostkit_get_reservations" && !args.from_date && !args.to_date && !args.reservation_date) {
+    return "Missing required argument: provide at least one of from_date, to_date or reservation_date";
   }
 
   if (toolName === "hostkit_get_reservations" && args.date_filter && !args.from_date && !args.to_date) {
