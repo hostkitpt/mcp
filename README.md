@@ -14,6 +14,8 @@ For enhanced security, API keys are property based, therefore must be generated 
 
 A rate limiting is enforced, please check the API documentation for the current limit.
 
+WARNING: Be very careful when using AI-generated or “vibe-coded” integrations. Hostkit is not responsible for API misuse, incorrect implementations, or unintended actions caused by third-party code.
+
 ## Requirements
 
 - Node.js 20+
