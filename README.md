@@ -1,4 +1,4 @@
-# Hostkit MCP
+# Hostkit Local MCP
 
 Local MCP distributed via GitHub for the Hostkit API.
 
