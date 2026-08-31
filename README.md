@@ -2,9 +2,8 @@
 
 Local MCP distributed via GitHub for the Hostkit API.
 
-Private API documentation: https://hostkit.pt/api/
-
-Public LLMs index: https://hostkit.pt/api/llms.txt
+- Private API documentation: https://hostkit.pt/api/
+- Public LLMs index: https://hostkit.pt/api/llms.txt
 
 The server talks to the public Hostkit API through:
 
@@ -14,7 +13,7 @@ https://app.hostkit.pt/api/{endpoint}?APIKEY=...
 
 For enhanced security, API keys are property based, therefore must be generated and maintained in the Hostkit App -> Properties -> API key tab of each property.
 
-A rate limiting is enforced, please check the API documentation for the current limit.
+A rate limiting is enforced, please check the documentation for the current limit.
 
 WARNING: Be very careful when using AI-generated or “vibe-coded” integrations. Hostkit is not responsible for API misuse, incorrect implementations, or unintended actions caused by third-party code.
 
