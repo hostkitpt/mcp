@@ -2,7 +2,8 @@
 
 Local MCP distributed via GitHub for the Hostkit API.
 
-API documentation: https://hostkit.pt/api/
+Private API documentation: https://hostkit.pt/api/
+Public LLMs index: https://hostkit.pt/api/llms.txt
 
 The server talks to the public Hostkit API through:
 
