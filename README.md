@@ -60,10 +60,6 @@ Example stdio configuration:
 }
 ```
 
-## Private ChatGPT prototype
-
-For a private ChatGPT developer-mode test using an existing property API key, see [CHATGPT_PRIVATE_PROTOTYPE.md](CHATGPT_PRIVATE_PROTOTYPE.md). This is not a public, customer-installable plugin.
-
 For local development before publishing:
 
 ```json
@@ -136,5 +132,5 @@ git push -u origin main
 ## Notes
 
 - Hostkit errors are returned as structured text content with `error`, `endpoint`, `status`, and `payload`.
-- The API key is never logged by this MCP.
+- The API key is never logged by this local MCP.
 - This local MCP intentionally does not expose a generic unrestricted endpoint caller.
