@@ -146,6 +146,8 @@ const tools = [
     description: stringSchema("Optional expense description."),
     payment_date: stringSchema("Optional payment date in YYYY-MM-DD format."),
     rcode: stringSchema("Optional reservation code."),
+    active: { type: "string", enum: ["0", "1"], description: "Optional: 1 active (default), 0 inactive." },
+    pmc: { type: "string", enum: ["0", "1", "2"], description: "Optional: 0 exclude (default), 1 invoice expense, 2 deduct expense. Nonzero requires the property's PMC module." },
   }, ["category", "document", "type", "vendor", "number", "date"]),
   tool("hostkit_add_expense_line", "Add one line to an expense and recalculate its totals; call once per line.", {
     id: numberOrStringSchema("Expense ID returned by hostkit_add_expense."),
@@ -155,6 +157,9 @@ const tools = [
   }, ["id", "description", "amount", "vat_rate"]),
   tool("hostkit_delete_expense", "Permanently delete an expense and all its lines.", {
     id: numberOrStringSchema("Expense ID to delete."),
+  }, ["id"]),
+  tool("hostkit_disable_expense", "Set an expense inactive without deleting it or its lines.", {
+    id: numberOrStringSchema("Expense ID to disable."),
   }, ["id"]),
   tool("hostkit_add_invoice", "Create an open invoice document.", invoiceProperties(), ["customer_id", "name", "country"]),
   tool("hostkit_add_invoice_line", "Add a line to an open invoice.", {
@@ -229,6 +234,7 @@ const endpointByTool = {
   hostkit_add_expense: "addExpense",
   hostkit_add_expense_line: "addExpenseLine",
   hostkit_delete_expense: "deleteExpense",
+  hostkit_disable_expense: "disableExpense",
   hostkit_add_invoice: "addInvoice",
   hostkit_add_invoice_line: "addInvoiceLine",
   hostkit_close_invoice: "closeInvoice",
