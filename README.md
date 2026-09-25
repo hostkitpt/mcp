@@ -116,6 +116,7 @@ git push -u origin main
 - `hostkit_add_expense`
 - `hostkit_add_expense_line`
 - `hostkit_delete_expense`
+- `hostkit_disable_expense`
 - `hostkit_add_invoice`
 - `hostkit_add_invoice_line`
 - `hostkit_close_invoice`
