@@ -1,4 +1,4 @@
-# Hostkit API Local MCP
+# Hostkit Local MCP
 
 Local MCP distributed via GitHub for the Hostkit API.
 
@@ -13,7 +13,7 @@ https://app.hostkit.pt/api/{endpoint}?APIKEY=...
 
 For enhanced security, API keys are property based, therefore must be generated and maintained in the Hostkit App -> Properties -> API key tab of each property.
 
-A rate limiting is enforced, please check the documentation for the current limit.
+A rate limiting is enforced, please check the API documentation for the current limit.
 
 WARNING: Be very careful when using AI-generated or “vibe-coded” integrations. Hostkit is not responsible for API misuse, incorrect implementations, or unintended actions caused by third-party code.
 
@@ -59,6 +59,10 @@ Example stdio configuration:
   }
 }
 ```
+
+## Private ChatGPT prototype
+
+For a private ChatGPT developer-mode test using an existing property API key, see [CHATGPT_PRIVATE_PROTOTYPE.md](CHATGPT_PRIVATE_PROTOTYPE.md). This is not a public, customer-installable plugin.
 
 For local development before publishing:
 
@@ -113,6 +117,9 @@ git push -u origin main
 - `hostkit_remove_all_guests`
 - `hostkit_add_reservation_extra`
 - `hostkit_delete_reservation_extras`
+- `hostkit_add_expense`
+- `hostkit_add_expense_line`
+- `hostkit_delete_expense`
 - `hostkit_add_invoice`
 - `hostkit_add_invoice_line`
 - `hostkit_close_invoice`
@@ -130,4 +137,4 @@ git push -u origin main
 
 - Hostkit errors are returned as structured text content with `error`, `endpoint`, `status`, and `payload`.
 - The API key is never logged by this MCP.
-- This MCP intentionally does not expose a generic unrestricted endpoint caller.
+- This local MCP intentionally does not expose a generic unrestricted endpoint caller.
