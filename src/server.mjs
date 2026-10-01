@@ -74,6 +74,12 @@ const tools = [
     rcode: stringSchema("Hostkit reservation code."),
     invoicing_nif: stringSchema("Invoicing VAT ID."),
   }, ["rcode"]),
+  tool("hostkit_get_series", "List all available invoicing series.", {
+    invoicing_nif: stringSchema("Invoicing VAT ID."),
+  }),
+  tool("hostkit_get_products", "List all available invoicing products.", {
+    invoicing_nif: stringSchema("Invoicing VAT ID."),
+  }),
   tool("hostkit_get_receipts", "List receipts or filter a specific receipt.", invoiceListProperties()),
   tool("hostkit_get_credit_notes", "List credit notes or filter a specific credit note.", {
     invoice_type: stringSchema("Invoice type."),
