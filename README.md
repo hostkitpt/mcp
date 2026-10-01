@@ -96,6 +96,8 @@ git push -u origin main
 - `hostkit_get_keycode`
 - `hostkit_get_invoices`
 - `hostkit_get_reservation_invoices`
+- `hostkit_get_series`
+- `hostkit_get_products`
 - `hostkit_get_receipts`
 - `hostkit_get_credit_notes`
 - `hostkit_get_saft`
