@@ -142,31 +142,6 @@ const tools = [
   tool("hostkit_delete_reservation_extras", "Delete all extras from one reservation.", {
     rcode: stringSchema("Hostkit reservation code."),
   }, ["rcode"]),
-  tool("hostkit_add_expense", "Create an expense with zero totals; then add each line with hostkit_add_expense_line.", {
-    category: numberOrStringSchema("Existing expense category ID."),
-    document: { type: "string", enum: ["invoice", "cnote"] },
-    type: { type: "string", enum: ["fixed", "variable"], description: "Use variable for a credit note." },
-    vendor: stringSchema("Vendor name, up to 50 characters."),
-    number: stringSchema("Document number, up to 30 characters."),
-    date: stringSchema("Document date in YYYY-MM-DD format."),
-    description: stringSchema("Optional expense description."),
-    payment_date: stringSchema("Optional payment date in YYYY-MM-DD format."),
-    rcode: stringSchema("Optional reservation code."),
-    active: { type: "string", enum: ["0", "1"], description: "Optional: 1 active (default), 0 inactive." },
-    pmc: { type: "string", enum: ["0", "1", "2"], description: "Optional: 0 exclude (default), 1 invoice expense, 2 deduct expense. Nonzero requires the property's PMC module." },
-  }, ["category", "document", "type", "vendor", "number", "date"]),
-  tool("hostkit_add_expense_line", "Add one line to an expense and recalculate its totals; call once per line.", {
-    id: numberOrStringSchema("Expense ID returned by hostkit_add_expense."),
-    description: stringSchema("Line description, up to 255 characters."),
-    amount: numberOrStringSchema("Non-negative line amount with up to two decimal places."),
-    vat_rate: numberOrStringSchema("VAT percentage from 0 to 100, with up to two decimal places."),
-  }, ["id", "description", "amount", "vat_rate"]),
-  tool("hostkit_delete_expense", "Permanently delete an expense and all its lines.", {
-    id: numberOrStringSchema("Expense ID to delete."),
-  }, ["id"]),
-  tool("hostkit_disable_expense", "Set an expense inactive without deleting it or its lines.", {
-    id: numberOrStringSchema("Expense ID to disable."),
-  }, ["id"]),
   tool("hostkit_add_invoice", "Create an open invoice document.", invoiceProperties(), ["customer_id", "name", "country"]),
   tool("hostkit_add_invoice_line", "Add a line to an open invoice.", {
     ...invoiceDocumentRefProperties(),
@@ -202,6 +177,31 @@ const tools = [
     year: numberOrStringSchema("Year."),
     month: numberOrStringSchema("Month."),
   }, ["invoicing_nif", "year", "month"]),
+  tool("hostkit_add_expense", "Create an expense with zero totals; then add each line with hostkit_add_expense_line.", {
+    category: numberOrStringSchema("Existing expense category ID."),
+    document: { type: "string", enum: ["invoice", "cnote"] },
+    type: { type: "string", enum: ["fixed", "variable"], description: "Use variable for a credit note." },
+    vendor: stringSchema("Vendor name, up to 50 characters."),
+    number: stringSchema("Document number, up to 30 characters."),
+    date: stringSchema("Document date in YYYY-MM-DD format."),
+    description: stringSchema("Optional expense description."),
+    payment_date: stringSchema("Optional payment date in YYYY-MM-DD format."),
+    rcode: stringSchema("Optional reservation code."),
+    active: { type: "string", enum: ["0", "1"], description: "Optional: 1 active (default), 0 inactive." },
+    pmc: { type: "string", enum: ["0", "1", "2"], description: "Optional: 0 exclude (default), 1 invoice expense, 2 deduct expense. Nonzero requires the property's PMC module." },
+  }, ["category", "document", "type", "vendor", "number", "date"]),
+  tool("hostkit_add_expense_line", "Add one line to an expense and recalculate its totals; call once per line.", {
+    id: numberOrStringSchema("Expense ID returned by hostkit_add_expense."),
+    description: stringSchema("Line description, up to 255 characters."),
+    amount: numberOrStringSchema("Non-negative line amount with up to two decimal places."),
+    vat_rate: numberOrStringSchema("VAT percentage from 0 to 100, with up to two decimal places."),
+  }, ["id", "description", "amount", "vat_rate"]),
+  tool("hostkit_delete_expense", "Permanently delete an expense and all its lines.", {
+    id: numberOrStringSchema("Expense ID to delete."),
+  }, ["id"]),
+  tool("hostkit_disable_expense", "Set an expense inactive without deleting it or its lines.", {
+    id: numberOrStringSchema("Expense ID to disable."),
+  }, ["id"]),
   tool("hostkit_send_siba", "Submit SIBA data for a reservation or explicit guest data.", {
     rcode: stringSchema("Hostkit reservation code."),
     ...sibaGuestProperties(),
@@ -237,10 +237,6 @@ const endpointByTool = {
   hostkit_remove_all_guests: "removeAllGuests",
   hostkit_add_reservation_extra: "addReservationExtra",
   hostkit_delete_reservation_extras: "deleteReservationExtras",
-  hostkit_add_expense: "addExpense",
-  hostkit_add_expense_line: "addExpenseLine",
-  hostkit_delete_expense: "deleteExpense",
-  hostkit_disable_expense: "disableExpense",
   hostkit_add_invoice: "addInvoice",
   hostkit_add_invoice_line: "addInvoiceLine",
   hostkit_close_invoice: "closeInvoice",
@@ -248,6 +244,10 @@ const endpointByTool = {
   hostkit_add_receipt: "addReceipt",
   hostkit_add_credit_note: "addCreditNote",
   hostkit_generate_saft: "generateSAFT",
+  hostkit_add_expense: "addExpense",
+  hostkit_add_expense_line: "addExpenseLine",
+  hostkit_delete_expense: "deleteExpense",
+  hostkit_disable_expense: "disableExpense",
   hostkit_send_siba: "sendSIBA",
 };
 
