@@ -131,6 +131,7 @@ git push -u origin main
 ## Resources
 
 - `https://hostkit.pt/api/` - official Hostkit API documentation
+- `https://hostkit.pt/api/changelog.md` - official Hostkit API changelog
 
 ## Notes
 
