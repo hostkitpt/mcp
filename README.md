@@ -15,7 +15,9 @@ For enhanced security, API keys are property based, therefore must be generated 
 
 A rate limiting is enforced, please check the API documentation for the current limit.
 
-WARNING: Be very careful when using AI-generated or “vibe-coded” integrations. Hostkit is not responsible for API misuse, incorrect implementations, or unintended actions caused by third-party code.
+## Disclaimer
+
+Be very careful when using AI-generated or “vibe-coded” integrations. Hostkit is not responsible for API misuse, incorrect implementations, or unintended actions caused by third-party code.
 
 ## Requirements
 
@@ -115,10 +117,6 @@ git push -u origin main
 - `hostkit_remove_all_guests`
 - `hostkit_add_reservation_extra`
 - `hostkit_delete_reservation_extras`
-- `hostkit_add_expense`
-- `hostkit_add_expense_line`
-- `hostkit_delete_expense`
-- `hostkit_disable_expense`
 - `hostkit_add_invoice`
 - `hostkit_add_invoice_line`
 - `hostkit_close_invoice`
@@ -126,6 +124,10 @@ git push -u origin main
 - `hostkit_add_receipt`
 - `hostkit_add_credit_note`
 - `hostkit_generate_saft`
+- `hostkit_add_expense`
+- `hostkit_add_expense_line`
+- `hostkit_delete_expense`
+- `hostkit_disable_expense`
 - `hostkit_send_siba`
 
 ## Resources
