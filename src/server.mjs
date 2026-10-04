@@ -40,6 +40,9 @@ const tools = [
     reservation_date: stringSchema("Reservation date in YYYY-MM-DD format."),
     get_archived: { type: "boolean" },
     room: stringSchema("Optional room filter."),
+    provider: stringSchema("Optional exact provider filter."),
+    language: stringSchema("Optional exact reservation language filter."),
+    nif: stringSchema("Optional exact reservation VAT ID filter."),
   }),
   tool("hostkit_get_reservation", "Get one reservation by Hostkit reservation code.", {
     rcode: stringSchema("Hostkit reservation code."),
