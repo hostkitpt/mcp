@@ -9,6 +9,7 @@ export const toolsV2 = operations.map((operation) => ({
   annotations: { readOnlyHint: operation.permission === 'read', destructiveHint: operation.method !== 'GET', idempotentHint: operation.permission === 'read', openWorldHint: true },
 }));
 export const toolOperationsV2 = Object.fromEntries(operations.map((operation) => [toolName(operation.name), operation.name]));
+export const toolRequestLimitsV2 = Object.fromEntries(operations.map((operation) => [toolName(operation.name), 65536 + (operation.maxBodyBytes ?? 0)]));
 const encode = (value) => encodeURIComponent(value).replace(/[!'()*]/g, (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`);
 
 export async function callHostkitV2(name, args, options = {}) {
@@ -32,13 +33,14 @@ export async function callHostkitV2(name, args, options = {}) {
   }
   const query = pairs.sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([key, value]) => `${key}=${value}`).join('&');
   const body = method === 'GET' ? '' : JSON.stringify(args);
-  if (Buffer.byteLength(body, 'utf8') > runtime.maxBodyBytes) throw new Error('Body exceeds 8192 UTF-8 bytes');
+  const maximum = operation.maxBodyBytes ?? runtime.maxBodyBytes;
+  if (Buffer.byteLength(body, 'utf8') > maximum) throw new Error(`Body exceeds ${maximum} UTF-8 bytes`);
   const timestamp = (options.now ?? (() => new Date()))().toISOString().replace(/\.\d{3}Z$/, 'Z');
   const nonce = (options.nonce ?? randomUUID)();
   const canonical = [method, path, query, timestamp, nonce, createHash('sha256').update(body, 'utf8').digest('hex'), key].join('\n');
   const headers = { Accept: 'application/json', 'X-API-Key': key, 'X-Timestamp': timestamp, 'X-Nonce': nonce, 'X-Signature': createHmac('sha256', secret).update(canonical, 'utf8').digest('base64') };
   if (method !== 'GET') headers['Content-Type'] = 'application/json';
-  const response = await (options.fetch ?? fetch)(`https://app.hostkit.pt${path}${query ? `?${query}` : ''}`, { method, headers, ...(body ? { body } : {}), redirect: 'error', signal: AbortSignal.timeout(30000) });
+  const response = await (options.fetch ?? fetch)(`https://app.hostkit.pt${path}${query ? `?${query}` : ''}`, { method, headers, ...(body ? { body } : {}), redirect: 'error', signal: AbortSignal.timeout(60000) });
   let payload;
   try { payload = await response.json(); } catch { throw new Error(`Hostkit returned a non-JSON response (HTTP ${response.status})`); }
   if (!response.ok || payload?.status !== 'success') throw new Error(`Hostkit HTTP ${response.status}: ${payload?.error?.code ?? 'invalid_response'}`);

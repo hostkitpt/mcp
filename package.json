@@ -1,6 +1,6 @@
 {
   "name": "hostkit-mcp",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "MCP client for the Hostkit API v2 with mandatory HMAC",
   "homepage": "https://github.com/hostkitpt/mcp",
   "type": "module",

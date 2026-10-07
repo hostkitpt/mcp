@@ -2184,11 +2184,11 @@
       "description": "Set an expense inactive without deleting its lines.",
       "group": "expenses"
     },
-    "getExpenseCategories": {
-      "name": "getExpenseCategories",
-      "method": "GET",
+    "uploadExpenseFile": {
+      "name": "uploadExpenseFile",
+      "method": "POST",
       "scope": "property",
-      "permission": "read",
+      "permission": "write",
       "schema": {
         "type": "object",
         "properties": {
@@ -2197,34 +2197,83 @@
             "description": "Property ID belonging to the authenticated account.",
             "minimum": 1,
             "maximum": 9007199254740991
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "filename": {
+            "type": "string",
+            "description": "Original filename; PDF, JPG, JPEG or PNG only. No directory paths.",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]*\\.(pdf|jpg|jpeg|png|PDF|JPG|JPEG|PNG)$"
+          },
+          "content_base64": {
+            "type": "string",
+            "description": "Canonical Base64 of the file bytes, without whitespace or a data URI.",
+            "minLength": 4,
+            "maxLength": 6990508
           }
         },
         "required": [
-          "apid"
+          "apid",
+          "id",
+          "filename",
+          "content_base64"
         ],
         "additionalProperties": false
       },
-      "description": "Read the existing expense category choices; only id and type are present in app data.",
+      "description": "Attach or replace one expense document using a signed JSON upload; no URL downloads or QR processing.",
       "group": "expenses",
+      "maxBodyBytes": 7340032,
+      "businessRules": [
+        "Maximum original file size is 5 MiB (5242880 bytes); the raw JSON ceiling is 7 MiB for this endpoint only. Other operations remain limited to 8192 bytes.",
+        "Verify expense/account/property ownership and the expenses module. Validate actual file content against its extension; unsupported or malformed documents are rejected.",
+        "Images are decoded and re-encoded as PNG; PDFs are rewritten before storage. Processing has time, memory and image-dimension limits and fails closed if validation tools are unavailable.",
+        "Store privately under a server-generated name, without execution permissions. Replace the existing attachment only after successful processing; original filenames never become filesystem paths.",
+        "Uploading an attachment does not parse QR codes, change expense lines/totals, or fetch a client URL."
+      ],
       "responseSchema": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "integer",
-              "description": "Numeric resource/document identity.",
-              "minimum": 1,
-              "maximum": 9007199254740991
-            },
-            "type": {
-              "type": "string",
-              "description": "Existing expense category label."
-            }
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
           },
-          "required": [],
-          "additionalProperties": false
-        }
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "content_type": {
+            "type": "string",
+            "description": "Stored media type."
+          },
+          "size": {
+            "type": "integer",
+            "description": "Stored file size in bytes.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "uploaded": {
+            "type": "boolean",
+            "description": "Attachment saved."
+          }
+        },
+        "required": [
+          "id",
+          "apid",
+          "content_type",
+          "size",
+          "uploaded"
+        ],
+        "additionalProperties": false
       }
     },
     "getInvoices": {
@@ -3777,6 +3826,298 @@
         "Tenant arrays are bounded at 20 and the whole UTF-8 body at 8192 bytes. Validate actual calendar dates and countries."
       ]
     },
+    "updateRentalContract": {
+      "name": "updateRentalContract",
+      "method": "PATCH",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "artigo": {
+            "type": "string",
+            "description": "Fiscal article.",
+            "minLength": 1,
+            "maxLength": 10
+          },
+          "fracao": {
+            "type": "string",
+            "description": "Fraction.",
+            "maxLength": 10
+          },
+          "contract_type": {
+            "type": "string",
+            "description": "Contract type.",
+            "enum": [
+              "ARREND",
+              "SUBARR",
+              "PROMES",
+              "CEDENC",
+              "ALUGUE"
+            ]
+          },
+          "purpose": {
+            "type": "string",
+            "description": "Purpose.",
+            "enum": [
+              "H_PERM",
+              "H_NPER",
+              "N_HABI"
+            ]
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date or empty.",
+            "pattern": "^([0-9]{4}-[0-9]{2}-[0-9]{2})?$"
+          },
+          "rent": {
+            "type": "string",
+            "description": "Rent.",
+            "pattern": "^[0-9]+(\\.[0-9]+)?$"
+          },
+          "deposit": {
+            "type": "string",
+            "description": "Deposit; default 0.",
+            "pattern": "^[0-9]+(\\.[0-9]+)?$"
+          },
+          "renewable": {
+            "type": "boolean",
+            "description": "Renewable; default false."
+          },
+          "rent_period": {
+            "type": "string",
+            "description": "Rent period; default MENSAL.",
+            "enum": [
+              "MENSAL",
+              "MENORM"
+            ]
+          },
+          "parte_comum": {
+            "type": "boolean",
+            "description": "Common part; default false."
+          },
+          "parte_arrendada": {
+            "type": "string",
+            "description": "Rented part; required when parte_comum is true.",
+            "maxLength": 255
+          },
+          "send_invoice_by_email": {
+            "type": "boolean",
+            "description": "Send invoice by email; default false."
+          },
+          "tenants": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Tenant name.",
+                  "minLength": 1,
+                  "maxLength": 170
+                },
+                "country": {
+                  "type": "string",
+                  "description": "Existing ICAO/ISO country code.",
+                  "minLength": 1
+                },
+                "nif": {
+                  "type": "string",
+                  "description": "Optional Portuguese VAT ID.",
+                  "pattern": "^([0-9]{9})?$"
+                },
+                "id_document": {
+                  "type": "string",
+                  "description": "Identity document.",
+                  "maxLength": 100
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Optional tenant email."
+                }
+              },
+              "required": [
+                "name",
+                "country"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "apid",
+          "id"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "artigo"
+            ]
+          },
+          {
+            "required": [
+              "fracao"
+            ]
+          },
+          {
+            "required": [
+              "contract_type"
+            ]
+          },
+          {
+            "required": [
+              "purpose"
+            ]
+          },
+          {
+            "required": [
+              "start_date"
+            ]
+          },
+          {
+            "required": [
+              "end_date"
+            ]
+          },
+          {
+            "required": [
+              "rent"
+            ]
+          },
+          {
+            "required": [
+              "deposit"
+            ]
+          },
+          {
+            "required": [
+              "renewable"
+            ]
+          },
+          {
+            "required": [
+              "rent_period"
+            ]
+          },
+          {
+            "required": [
+              "parte_comum"
+            ]
+          },
+          {
+            "required": [
+              "parte_arrendada"
+            ]
+          },
+          {
+            "required": [
+              "send_invoice_by_email"
+            ]
+          },
+          {
+            "required": [
+              "tenants"
+            ]
+          }
+        ]
+      },
+      "description": "Update supplied fields and optionally replace tenants of a draft rental contract.",
+      "group": "contracts",
+      "businessRules": [
+        "Only DRAFT contracts belonging to this account and apid can be edited. id, apid, contract_ref, creation date and status are immutable.",
+        "Omitted fields remain unchanged; a supplied tenants array replaces all tenants atomically. Validate the effective saved and supplied dates and rented-part fields together.",
+        "Pending or uncertain AT submissions block editing until reconciled. Automatic invoicing settings are not modified."
+      ]
+    },
+    "submitRentalContract": {
+      "name": "submitRentalContract",
+      "method": "POST",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "apid",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Submit a draft rental contract to AT and activate it only after confirmed acceptance.",
+      "group": "contracts",
+      "businessRules": [
+        "Requires DRAFT, account/property ownership, configured landlords and valid AT credentials for the property invoicing NIF.",
+        "Submission does not mean local activation only. Confirmed AT acceptance sets ACTIVE; confirmed rejection retains DRAFT.",
+        "Serialize submissions and persist a pending marker before contacting AT. An uncertain result blocks editing, deletion and resubmission until operator reconciliation; never retry automatically."
+      ]
+    },
+    "deleteRentalContract": {
+      "name": "deleteRentalContract",
+      "method": "DELETE",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "apid",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Permanently delete a draft rental contract and its tenants/invoice settings.",
+      "group": "contracts",
+      "businessRules": [
+        "Only DRAFT contracts belonging to this account and apid can be deleted. Pending or uncertain AT submissions block deletion.",
+        "Delete the contract and its child records atomically; active contracts cannot be deleted."
+      ]
+    },
     "getCityTaxDeclarations": {
       "name": "getCityTaxDeclarations",
       "method": "GET",
@@ -3795,14 +4136,6 @@
             "type": "string",
             "description": "Source-qualified opaque declaration identity, not a numeric database ID.",
             "pattern": "^(tmtai|itaxas):[A-Za-z0-9_-][A-Za-z0-9_.-]{0,127}$"
-          },
-          "source": {
-            "type": "string",
-            "description": "Declaration source; part of its identity.",
-            "enum": [
-              "tmtai",
-              "itaxas"
-            ]
           },
           "uniqid": {
             "type": "string",
@@ -3853,7 +4186,7 @@
       "description": "Read city-tax declarations with their local PDF in document as base64 JSON, or null when no local PDF is available.",
       "group": "tmt",
       "businessRules": [
-        "uniqid requires source. Month and quarter are mutually exclusive and require year. Conflicting declaration identities must be rejected.",
+        "Search both declaration sources automatically; source is a response field, not a request filter. uniqid searches both sources; use the returned source-qualified id to select one unambiguously. Month and quarter are mutually exclusive and require year. Conflicting declaration identities must be rejected.",
         "Validate source-specific periods and states. iTaxas keeps its stored numeric month when historical periodicity is unknown.",
         "Grouped declarations appear once and must include the requested property. Never expose municipal credentials or internal error text.",
         "Returns declarations, limit, offset and has_more. Each declaration contains document: {content_base64, content_type, filename} for an available local TMTAI PDF, otherwise null.",
@@ -4570,8 +4903,11 @@
       "apid": 123,
       "id": 1
     },
-    "getExpenseCategories": {
-      "apid": 123
+    "uploadExpenseFile": {
+      "apid": 123,
+      "id": 1,
+      "filename": "expense.pdf",
+      "content_base64": "JVBERi0xLjQKJSBFeGFtcGxlIG9ubHkK"
     },
     "getInvoices": {
       "invoicing_nif": "123456789"
@@ -4710,6 +5046,19 @@
           "country": "PRT"
         }
       ]
+    },
+    "updateRentalContract": {
+      "apid": 123,
+      "id": 1,
+      "rent": "550.00"
+    },
+    "submitRentalContract": {
+      "apid": 123,
+      "id": 1
+    },
+    "deleteRentalContract": {
+      "apid": 123,
+      "id": 1
     },
     "getCityTaxDeclarations": {
       "apid": 123
