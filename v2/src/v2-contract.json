@@ -1,0 +1,4730 @@
+{
+  "version": "2.0.0",
+  "status": "candidate",
+  "serverURL": "https://app.hostkit.pt/api/v2",
+  "maxBodyBytes": 8192,
+  "authentication": {
+    "headers": [
+      "X-API-Key",
+      "X-Timestamp",
+      "X-Nonce",
+      "X-Signature"
+    ],
+    "algorithm": "HMAC-SHA256",
+    "signatureEncoding": "Base64",
+    "secret": "Base64 text representing 32 random bytes; use that text as the UTF-8 HMAC key, without Base64 decoding.",
+    "canonical": "METHOD\nPATH\nCANONICAL_QUERY\nTIMESTAMP\nNONCE\nSHA256_RAW_BODY_HEX\nAPI_KEY",
+    "timestamp": "UTC YYYY-MM-DDTHH:mm:ssZ",
+    "nonce": "UUID v4",
+    "query": "Decode once; reject invalid percent/UTF-8 encoding and duplicate decoded keys; RFC3986 encode and sort encoded keys; space is %20."
+  },
+  "aliases": {
+    "getReservation": "getReservations",
+    "getReservationByCmId": "getReservations",
+    "getProperty": "getProperties",
+    "getReservationInvoices": "getInvoices"
+  },
+  "operations": {
+    "getLicense": {
+      "name": "getLicense",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "legacy": "getLicense",
+      "description": "Read account license plan and expiration.",
+      "group": "account"
+    },
+    "getProperties": {
+      "name": "getProperties",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "legacy": "getProperties",
+      "description": "Discover account properties, or filter the detail by apid.",
+      "group": "properties"
+    },
+    "addProperty": {
+      "name": "addProperty",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "property_name": {
+            "type": "string",
+            "description": "Property name.",
+            "minLength": 1
+          },
+          "address": {
+            "type": "string",
+            "description": "Street address.",
+            "minLength": 1
+          },
+          "zip": {
+            "type": "string",
+            "description": "Portuguese postal code.",
+            "pattern": "^[0-9]{4}-[0-9]{3}$"
+          },
+          "city": {
+            "type": "string",
+            "description": "City.",
+            "minLength": 1
+          },
+          "latitude": {
+            "type": "string",
+            "description": "Latitude.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "longitude": {
+            "type": "string",
+            "description": "Longitude.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "default_checkin": {
+            "type": "integer",
+            "description": "Check-in hour; default 15.",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "default_checkout": {
+            "type": "integer",
+            "description": "Checkout hour; default 11.",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "license_number": {
+            "type": "string",
+            "description": "Government license number, not an internal ID.",
+            "pattern": "^[0-9]+$"
+          },
+          "license_type": {
+            "type": "string",
+            "description": "Government license type; default RNAL.",
+            "enum": [
+              "RNAL",
+              "RNET",
+              "RRAL"
+            ]
+          },
+          "siba_id": {
+            "type": "string",
+            "description": "SIBA ID.",
+            "pattern": "^([0-9]{9})?$"
+          },
+          "siba_order": {
+            "type": "integer",
+            "description": "SIBA establishment number; default 0.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "siba_code": {
+            "type": "string",
+            "description": "SIBA activation key.",
+            "pattern": "^([0-9]{12})?$"
+          },
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Property invoicing VAT ID; any nonempty value requires fiscal authorization."
+          },
+          "invoicing_name": {
+            "type": "string",
+            "description": "Invoicing name."
+          },
+          "invoicing_email": {
+            "type": "string",
+            "description": "Invoicing email."
+          },
+          "invoicing_phone": {
+            "type": "string",
+            "description": "Invoicing phone."
+          },
+          "invoicing_address": {
+            "type": "string",
+            "description": "Invoicing address."
+          },
+          "typology": {
+            "type": "string",
+            "description": "Property typology; default T1.",
+            "enum": [
+              "T0",
+              "T1",
+              "T2",
+              "T3",
+              "T4",
+              "T5",
+              "T6",
+              "NA"
+            ]
+          }
+        },
+        "required": [
+          "property_name",
+          "address",
+          "zip",
+          "city",
+          "license_number"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "addProperty",
+      "description": "Create an initially inactive property.",
+      "group": "properties"
+    },
+    "updateProperty": {
+      "name": "updateProperty",
+      "method": "PATCH",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "property_name": {
+            "type": "string",
+            "description": "Property name.",
+            "minLength": 1
+          },
+          "address": {
+            "type": "string",
+            "description": "Street address.",
+            "minLength": 1
+          },
+          "zip": {
+            "type": "string",
+            "description": "Portuguese postal code.",
+            "pattern": "^[0-9]{4}-[0-9]{3}$"
+          },
+          "city": {
+            "type": "string",
+            "description": "City.",
+            "minLength": 1
+          },
+          "latitude": {
+            "type": "string",
+            "description": "Latitude.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "longitude": {
+            "type": "string",
+            "description": "Longitude.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "default_checkin": {
+            "type": "integer",
+            "description": "Check-in hour; default 15.",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "default_checkout": {
+            "type": "integer",
+            "description": "Checkout hour; default 11.",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "license_number": {
+            "type": "string",
+            "description": "Government license number, not an internal ID.",
+            "pattern": "^[0-9]+$"
+          },
+          "license_type": {
+            "type": "string",
+            "description": "Government license type; default RNAL.",
+            "enum": [
+              "RNAL",
+              "RNET",
+              "RRAL"
+            ]
+          },
+          "siba_id": {
+            "type": "string",
+            "description": "SIBA ID.",
+            "pattern": "^([0-9]{9})?$"
+          },
+          "siba_order": {
+            "type": "integer",
+            "description": "SIBA establishment number; default 0.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "siba_code": {
+            "type": "string",
+            "description": "SIBA activation key.",
+            "pattern": "^([0-9]{12})?$"
+          },
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Property invoicing VAT ID; any nonempty value requires fiscal authorization."
+          },
+          "invoicing_name": {
+            "type": "string",
+            "description": "Invoicing name."
+          },
+          "invoicing_email": {
+            "type": "string",
+            "description": "Invoicing email."
+          },
+          "invoicing_phone": {
+            "type": "string",
+            "description": "Invoicing phone."
+          },
+          "invoicing_address": {
+            "type": "string",
+            "description": "Invoicing address."
+          }
+        },
+        "required": [
+          "apid"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "property_name"
+            ]
+          },
+          {
+            "required": [
+              "address"
+            ]
+          },
+          {
+            "required": [
+              "zip"
+            ]
+          },
+          {
+            "required": [
+              "city"
+            ]
+          },
+          {
+            "required": [
+              "latitude"
+            ]
+          },
+          {
+            "required": [
+              "longitude"
+            ]
+          },
+          {
+            "required": [
+              "default_checkin"
+            ]
+          },
+          {
+            "required": [
+              "default_checkout"
+            ]
+          },
+          {
+            "required": [
+              "license_number"
+            ]
+          },
+          {
+            "required": [
+              "license_type"
+            ]
+          },
+          {
+            "required": [
+              "siba_id"
+            ]
+          },
+          {
+            "required": [
+              "siba_order"
+            ]
+          },
+          {
+            "required": [
+              "siba_code"
+            ]
+          },
+          {
+            "required": [
+              "invoicing_nif"
+            ]
+          },
+          {
+            "required": [
+              "invoicing_name"
+            ]
+          },
+          {
+            "required": [
+              "invoicing_email"
+            ]
+          },
+          {
+            "required": [
+              "invoicing_phone"
+            ]
+          },
+          {
+            "required": [
+              "invoicing_address"
+            ]
+          }
+        ]
+      },
+      "legacy": "updateProperty",
+      "description": "Update supplied property fields; typology is not supported.",
+      "group": "properties",
+      "businessRules": [
+        "Supply at least one editable property field. Omitted fields remain unchanged.",
+        "Any nonempty invoicing_nif must be authorized for this account."
+      ]
+    },
+    "getReservations": {
+      "name": "getReservations",
+      "method": "GET",
+      "scope": "property",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "channelmanager": {
+            "type": "string",
+            "description": "Channel manager name for the external id.",
+            "pattern": "^[A-Za-z0-9_]+$"
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "from_date": {
+            "type": "string",
+            "description": "Without date_filter: check-in >= this date at midnight.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "to_date": {
+            "type": "string",
+            "description": "Without date_filter: checkout <= this date at midnight. With date_filter: include the selected end day.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "reservation_date": {
+            "type": "string",
+            "description": "Lower bound on reservation creation, not a single-day match.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "date_filter": {
+            "type": "string",
+            "description": "Apply both boundaries to check-in or checkout.",
+            "enum": [
+              "checkin",
+              "checkout"
+            ]
+          },
+          "get_archived": {
+            "type": "boolean",
+            "description": "Search archived instead of active reservations. CM identity lookup searches both in the current app."
+          },
+          "room": {
+            "type": "string",
+            "description": "Room filter."
+          },
+          "provider": {
+            "type": "string",
+            "description": "Exact provider filter."
+          },
+          "language": {
+            "type": "string",
+            "description": "Exact language filter."
+          },
+          "nif": {
+            "type": "string",
+            "description": "Exact reservation VAT ID, not invoicing_nif."
+          }
+        },
+        "required": [
+          "apid"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "rcode"
+            ]
+          },
+          {
+            "required": [
+              "channelmanager",
+              "id"
+            ]
+          },
+          {
+            "required": [
+              "from_date"
+            ]
+          },
+          {
+            "required": [
+              "to_date"
+            ]
+          },
+          {
+            "required": [
+              "reservation_date"
+            ]
+          }
+        ]
+      },
+      "legacy": "getReservations",
+      "description": "List reservations by identity or the existing date and equality filters.",
+      "group": "reservations",
+      "businessRules": [
+        "Require rcode, or channelmanager and id together, or at least one date filter.",
+        "Do not combine rcode and CM identity; reject incomplete CM selectors even when dates are supplied.",
+        "Identity and list filters cannot be combined: rcode/CM selectors reject from_date, to_date, reservation_date, date_filter, room, provider, language and nif rather than ignoring them.",
+        "date_filter requires from_date or to_date; from_date <= to_date. Validate real calendar dates.",
+        "The current date search rejects dates more than 365 days in the past; future dates are accepted.",
+        "Preserve supplied filters. This is not an overlap search. Without date_filter the end boundary is midnight; with it, the selected end day is included."
+      ]
+    },
+    "addReservation": {
+      "name": "addReservation",
+      "method": "POST",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name; alternative to first_name and last_name.",
+            "minLength": 1
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "check_in": {
+            "type": "string",
+            "description": "Check-in in the existing app/server business timezone; no per-property conversion is added.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$"
+          },
+          "check_out": {
+            "type": "string",
+            "description": "Checkout in the existing app/server business timezone; no per-property conversion is added.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$"
+          },
+          "pax": {
+            "type": "integer",
+            "description": "Number of guests; default 1.",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "email": {
+            "type": "string",
+            "description": "Guest email."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Guest phone."
+          },
+          "received_amount": {
+            "type": "string",
+            "description": "Received amount; default 0.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "host_commission": {
+            "type": "string",
+            "description": "Channel commission; default 0.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "cleaning_fee": {
+            "type": "string",
+            "description": "Cleaning fee; default 0.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "extra_fees": {
+            "type": "string",
+            "description": "Extra fees; default 0.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "city_tax": {
+            "type": "string",
+            "description": "City tax; default 0.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "provider": {
+            "type": "string",
+            "description": "Provider/channel name."
+          },
+          "room": {
+            "type": "string",
+            "description": "Room, or comma-separated rooms as accepted by the current app."
+          },
+          "beds": {
+            "type": "string",
+            "description": "Beds."
+          },
+          "private_note": {
+            "type": "string",
+            "description": "Reservation private note."
+          },
+          "service_notes": {
+            "type": "string",
+            "description": "Service user notes."
+          },
+          "vat_number": {
+            "type": "string",
+            "description": "Reservation customer VAT ID."
+          },
+          "vat_name": {
+            "type": "string",
+            "description": "Reservation customer fiscal name."
+          },
+          "flight": {
+            "type": "string",
+            "description": "Flight number."
+          },
+          "flight_time": {
+            "type": "string",
+            "description": "Flight time."
+          },
+          "arrival_by": {
+            "type": "string",
+            "description": "Arrival transport."
+          },
+          "service_in": {
+            "type": "string",
+            "description": "Assigned check-in service."
+          },
+          "service_out": {
+            "type": "string",
+            "description": "Assigned checkout service."
+          },
+          "service_cleaning": {
+            "type": "string",
+            "description": "Assigned cleaning service."
+          },
+          "service_transfer_arr": {
+            "type": "string",
+            "description": "Assigned arrival transfer service."
+          },
+          "service_transfer_dep": {
+            "type": "string",
+            "description": "Assigned departure transfer service."
+          },
+          "service_laundry": {
+            "type": "string",
+            "description": "Assigned laundry service."
+          },
+          "reservation_date": {
+            "type": "string",
+            "description": "Reservation creation date; omission uses the current time.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "block_sef": {
+            "type": "boolean",
+            "description": "Block SIBA automation; default false."
+          },
+          "create_payment": {
+            "type": "boolean",
+            "description": "Create payment; default false."
+          }
+        },
+        "required": [
+          "apid",
+          "rcode",
+          "check_in",
+          "check_out"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "name"
+            ]
+          },
+          {
+            "required": [
+              "first_name",
+              "last_name"
+            ]
+          }
+        ]
+      },
+      "legacy": "addReservation",
+      "description": "Create a reservation using current app fields.",
+      "group": "reservations",
+      "businessRules": [
+        "Require name or first_name and last_name. Validate calendar/time values and checkout after check-in."
+      ]
+    },
+    "updateReservation": {
+      "name": "updateReservation",
+      "method": "PATCH",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name; alternative to first_name and last_name.",
+            "minLength": 1
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "check_in": {
+            "type": "string",
+            "description": "Check-in in the existing app/server business timezone; no per-property conversion is added.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$"
+          },
+          "check_out": {
+            "type": "string",
+            "description": "Checkout in the existing app/server business timezone; no per-property conversion is added.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$"
+          },
+          "pax": {
+            "type": "integer",
+            "description": "Number of guests; default 1.",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "email": {
+            "type": "string",
+            "description": "Guest email."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Guest phone."
+          },
+          "received_amount": {
+            "type": "string",
+            "description": "Received amount; default 0.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "host_commission": {
+            "type": "string",
+            "description": "Channel commission; default 0.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "cleaning_fee": {
+            "type": "string",
+            "description": "Cleaning fee; default 0.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "extra_fees": {
+            "type": "string",
+            "description": "Extra fees; default 0.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "city_tax": {
+            "type": "string",
+            "description": "City tax; default 0.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "provider": {
+            "type": "string",
+            "description": "Provider/channel name."
+          },
+          "room": {
+            "type": "string",
+            "description": "Room, or comma-separated rooms as accepted by the current app."
+          },
+          "beds": {
+            "type": "string",
+            "description": "Beds."
+          },
+          "private_note": {
+            "type": "string",
+            "description": "Reservation private note."
+          },
+          "service_notes": {
+            "type": "string",
+            "description": "Service user notes."
+          },
+          "vat_number": {
+            "type": "string",
+            "description": "Reservation customer VAT ID."
+          },
+          "vat_name": {
+            "type": "string",
+            "description": "Reservation customer fiscal name."
+          },
+          "flight": {
+            "type": "string",
+            "description": "Flight number."
+          },
+          "flight_time": {
+            "type": "string",
+            "description": "Flight time."
+          },
+          "arrival_by": {
+            "type": "string",
+            "description": "Arrival transport."
+          },
+          "service_in": {
+            "type": "string",
+            "description": "Assigned check-in service."
+          },
+          "service_out": {
+            "type": "string",
+            "description": "Assigned checkout service."
+          },
+          "service_cleaning": {
+            "type": "string",
+            "description": "Assigned cleaning service."
+          },
+          "service_transfer_arr": {
+            "type": "string",
+            "description": "Assigned arrival transfer service."
+          },
+          "service_transfer_dep": {
+            "type": "string",
+            "description": "Assigned departure transfer service."
+          },
+          "service_laundry": {
+            "type": "string",
+            "description": "Assigned laundry service."
+          }
+        },
+        "required": [
+          "apid",
+          "rcode"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "name"
+            ]
+          },
+          {
+            "required": [
+              "first_name"
+            ]
+          },
+          {
+            "required": [
+              "last_name"
+            ]
+          },
+          {
+            "required": [
+              "check_in"
+            ]
+          },
+          {
+            "required": [
+              "check_out"
+            ]
+          },
+          {
+            "required": [
+              "pax"
+            ]
+          },
+          {
+            "required": [
+              "email"
+            ]
+          },
+          {
+            "required": [
+              "phone"
+            ]
+          },
+          {
+            "required": [
+              "received_amount"
+            ]
+          },
+          {
+            "required": [
+              "host_commission"
+            ]
+          },
+          {
+            "required": [
+              "cleaning_fee"
+            ]
+          },
+          {
+            "required": [
+              "extra_fees"
+            ]
+          },
+          {
+            "required": [
+              "city_tax"
+            ]
+          },
+          {
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "required": [
+              "room"
+            ]
+          },
+          {
+            "required": [
+              "beds"
+            ]
+          },
+          {
+            "required": [
+              "private_note"
+            ]
+          },
+          {
+            "required": [
+              "service_notes"
+            ]
+          },
+          {
+            "required": [
+              "vat_number"
+            ]
+          },
+          {
+            "required": [
+              "vat_name"
+            ]
+          },
+          {
+            "required": [
+              "flight"
+            ]
+          },
+          {
+            "required": [
+              "flight_time"
+            ]
+          },
+          {
+            "required": [
+              "arrival_by"
+            ]
+          },
+          {
+            "required": [
+              "service_in"
+            ]
+          },
+          {
+            "required": [
+              "service_out"
+            ]
+          },
+          {
+            "required": [
+              "service_cleaning"
+            ]
+          },
+          {
+            "required": [
+              "service_transfer_arr"
+            ]
+          },
+          {
+            "required": [
+              "service_transfer_dep"
+            ]
+          },
+          {
+            "required": [
+              "service_laundry"
+            ]
+          }
+        ]
+      },
+      "legacy": "updateReservation",
+      "description": "Update supplied fields in an active or archived reservation.",
+      "group": "reservations",
+      "businessRules": [
+        "Supply at least one editable field in addition to apid and rcode. Omitted fields remain unchanged.",
+        "Creation-only reservation_date, block_sef and create_payment are not accepted.",
+        "When only check_in or check_out is supplied, validate it against the stored counterpart; checkout must follow check-in."
+      ]
+    },
+    "cancelReservation": {
+      "name": "cancelReservation",
+      "method": "PATCH",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          }
+        },
+        "required": [
+          "apid",
+          "rcode"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "cancelReservation",
+      "description": "Atomically move an active or archived reservation to cancellations; this is not deletion.",
+      "group": "reservations",
+      "businessRules": [
+        "Requires InnoDB tables properties, reservations, reservations_archived, reservations_cancelled, fac_invoices and fac_config. Lock the property/reservation and require one unambiguous source; failures roll back the move.",
+        "If a closed related invoice and credit_note_on_cancel configuration require automatic fiscal cancellation, return HTTP 503 automatic_credit_note_unavailable before reservation or fiscal changes. Complete the separate fiscal workflow in the application. No automatic credit notes or external AT series registration are provided by this operation."
+      ]
+    },
+    "deleteReservation": {
+      "name": "deleteReservation",
+      "method": "DELETE",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          }
+        },
+        "required": [
+          "apid",
+          "rcode"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "deleteReservation",
+      "description": "Atomically delete a reservation and related records permanently.",
+      "group": "reservations",
+      "businessRules": [
+        "Requires all affected reservation, related-data and channel-manager mapping tables to use InnoDB. Fail closed with HTTP 503 transactions_unavailable when transactional requirements are not met; partial deletion is not permitted.",
+        "Lock the property/reservation and require one unambiguous active or archived source before deleting related records."
+      ]
+    },
+    "getPayments": {
+      "name": "getPayments",
+      "method": "GET",
+      "scope": "property",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          }
+        },
+        "required": [
+          "apid",
+          "rcode"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "getPayments",
+      "description": "Read reservation payments.",
+      "group": "reservations"
+    },
+    "getOnlineCheckin": {
+      "name": "getOnlineCheckin",
+      "method": "GET",
+      "scope": "property",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          }
+        },
+        "required": [
+          "apid",
+          "rcode"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "getOnlineCheckin",
+      "description": "Read reservation online check-in link and status.",
+      "group": "reservations"
+    },
+    "addGuest": {
+      "name": "addGuest",
+      "method": "POST",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name; alternative to first_name and last_name.",
+            "minLength": 1
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "nationality": {
+            "type": "string",
+            "description": "Nationality: existing ICAO/ISO country code."
+          },
+          "birthday": {
+            "type": "string",
+            "description": "Birth date.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "doc_id": {
+            "type": "string",
+            "description": "Identity document number.",
+            "maxLength": 16
+          },
+          "doc_type": {
+            "type": "string",
+            "description": "Identity document type.",
+            "enum": [
+              "P",
+              "B",
+              "ID",
+              "BI",
+              "O",
+              "Passaporte",
+              "Passport",
+              "Outro",
+              "Other"
+            ]
+          },
+          "doc_country": {
+            "type": "string",
+            "description": "Issuing country code."
+          },
+          "arrival": {
+            "type": "string",
+            "description": "Arrival date.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "departure": {
+            "type": "string",
+            "description": "Departure date, after arrival.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "country_residence": {
+            "type": "string",
+            "description": "Country of residence code."
+          },
+          "city_residence": {
+            "type": "string",
+            "description": "City of residence.",
+            "maxLength": 30
+          }
+        },
+        "required": [
+          "apid",
+          "rcode",
+          "nationality",
+          "birthday",
+          "doc_id",
+          "doc_type",
+          "doc_country",
+          "arrival",
+          "departure",
+          "country_residence",
+          "city_residence"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "name"
+            ]
+          },
+          {
+            "required": [
+              "first_name",
+              "last_name"
+            ]
+          }
+        ]
+      },
+      "legacy": "addGuest",
+      "description": "Add guest data to a reservation.",
+      "group": "guests",
+      "businessRules": [
+        "Require name or first_name and last_name; verify country codes and departure after arrival."
+      ]
+    },
+    "removeGuest": {
+      "name": "removeGuest",
+      "method": "DELETE",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name; alternative to first_name and last_name.",
+            "minLength": 1
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name.",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "required": [
+          "apid",
+          "rcode"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "name"
+            ]
+          },
+          {
+            "required": [
+              "first_name",
+              "last_name"
+            ]
+          }
+        ]
+      },
+      "legacy": "removeGuest",
+      "description": "Remove the explicitly named guest from a reservation.",
+      "group": "guests"
+    },
+    "removeAllGuests": {
+      "name": "removeAllGuests",
+      "method": "DELETE",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          }
+        },
+        "required": [
+          "apid",
+          "rcode"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "removeAllGuests",
+      "description": "Remove all guest data from the explicitly identified reservation.",
+      "group": "guests"
+    },
+    "addReservationExtra": {
+      "name": "addReservationExtra",
+      "method": "POST",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "extra_id": {
+            "type": "string",
+            "description": "Extra product code; current runtime permits fewer than 20 characters.",
+            "pattern": "^[A-Za-z0-9_-]{1,19}$"
+          },
+          "extra_name": {
+            "type": "string",
+            "description": "Extra name."
+          },
+          "extra_vat": {
+            "type": "integer",
+            "description": "Existing fiscal VAT rate.",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "extra_type": {
+            "type": "string",
+            "description": "S service, I tax, P product.",
+            "enum": [
+              "S",
+              "I",
+              "P"
+            ]
+          },
+          "extra_total": {
+            "type": "string",
+            "description": "Positive extra total.",
+            "pattern": "^[0-9]+(\\.[0-9]+)?$"
+          }
+        },
+        "required": [
+          "apid",
+          "rcode",
+          "extra_id",
+          "extra_name",
+          "extra_vat",
+          "extra_type",
+          "extra_total"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "addReservationExtra",
+      "description": "Add a reservation extra; create the fiscal product if absent, as in the current app.",
+      "group": "extras",
+      "businessRules": [
+        "extra_total must be greater than zero; extra_vat must exist in the fiscal VAT catalogue.",
+        "Authorize the property invoicing/extras NIF before creating a product."
+      ]
+    },
+    "deleteReservationExtras": {
+      "name": "deleteReservationExtras",
+      "method": "DELETE",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          }
+        },
+        "required": [
+          "apid",
+          "rcode"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "deleteReservationExtras",
+      "description": "Delete all extras of the explicitly identified reservation.",
+      "group": "extras"
+    },
+    "getReservationExtras": {
+      "name": "getReservationExtras",
+      "method": "GET",
+      "scope": "property",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          }
+        },
+        "required": [
+          "apid",
+          "rcode"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Read saved reservation extra lines; no invented catalogue fields.",
+      "group": "extras",
+      "responseSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "idx": {
+              "type": "integer",
+              "description": "Numeric resource/document identity.",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "product_id": {
+              "type": "string",
+              "description": "Saved product code."
+            },
+            "name": {
+              "type": "string",
+              "description": "Saved extra name."
+            },
+            "percentage": {
+              "type": "string",
+              "description": "Saved VAT percentage.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+            },
+            "total": {
+              "type": "string",
+              "description": "Saved total.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+            },
+            "type": {
+              "type": "string",
+              "description": "Saved type.",
+              "enum": [
+                "S",
+                "I",
+                "P"
+              ]
+            },
+            "tstamp": {
+              "type": "integer",
+              "description": "Unix timestamp in seconds.",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      }
+    },
+    "getKeycode": {
+      "name": "getKeycode",
+      "method": "GET",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "provider": {
+            "type": "string",
+            "description": "Lock provider.",
+            "enum": [
+              "nuki",
+              "homeit",
+              "ttlock",
+              "salto",
+              "omnitec",
+              "voyager",
+              "tedee",
+              "assa_abloy"
+            ]
+          }
+        },
+        "required": [
+          "apid",
+          "rcode",
+          "provider"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "getKeycode",
+      "description": "Read a reservation keycode or invite code from a supported lock provider.",
+      "group": "access"
+    },
+    "getLastSIBADate": {
+      "name": "getLastSIBADate",
+      "method": "GET",
+      "scope": "property",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "apid"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "getLastSIBADate",
+      "description": "Read the last successful SIBA submission date. The current app records this at account level.",
+      "group": "siba"
+    },
+    "validateSIBA": {
+      "name": "validateSIBA",
+      "method": "GET",
+      "scope": "property",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name; alternative to first_name and last_name.",
+            "minLength": 1
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "nationality": {
+            "type": "string",
+            "description": "Nationality: existing ICAO/ISO country code."
+          },
+          "birthday": {
+            "type": "string",
+            "description": "Birth date.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "doc_id": {
+            "type": "string",
+            "description": "Identity document number.",
+            "maxLength": 16
+          },
+          "doc_type": {
+            "type": "string",
+            "description": "Identity document type.",
+            "enum": [
+              "P",
+              "B",
+              "ID",
+              "BI",
+              "O",
+              "Passaporte",
+              "Passport",
+              "Outro",
+              "Other"
+            ]
+          },
+          "doc_country": {
+            "type": "string",
+            "description": "Issuing country code."
+          },
+          "arrival": {
+            "type": "string",
+            "description": "Arrival date.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "departure": {
+            "type": "string",
+            "description": "Departure date, after arrival.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "country_residence": {
+            "type": "string",
+            "description": "Country of residence code."
+          },
+          "city_residence": {
+            "type": "string",
+            "description": "City of residence.",
+            "maxLength": 30
+          }
+        },
+        "required": [
+          "apid"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "rcode"
+            ]
+          },
+          {
+            "required": [
+              "nationality",
+              "birthday",
+              "doc_id",
+              "doc_type",
+              "doc_country",
+              "arrival",
+              "departure",
+              "country_residence",
+              "city_residence",
+              "name"
+            ]
+          },
+          {
+            "required": [
+              "nationality",
+              "birthday",
+              "doc_id",
+              "doc_type",
+              "doc_country",
+              "arrival",
+              "departure",
+              "country_residence",
+              "city_residence",
+              "first_name",
+              "last_name"
+            ]
+          }
+        ]
+      },
+      "legacy": "validateSIBA",
+      "description": "Validate stored reservation data or explicit guest data without submitting.",
+      "group": "siba",
+      "businessRules": [
+        "Require rcode or complete named guest data. Validate countries, dates and departure after arrival."
+      ]
+    },
+    "sendSIBA": {
+      "name": "sendSIBA",
+      "method": "POST",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name; alternative to first_name and last_name.",
+            "minLength": 1
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name.",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "nationality": {
+            "type": "string",
+            "description": "Nationality: existing ICAO/ISO country code."
+          },
+          "birthday": {
+            "type": "string",
+            "description": "Birth date.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "doc_id": {
+            "type": "string",
+            "description": "Identity document number.",
+            "maxLength": 16
+          },
+          "doc_type": {
+            "type": "string",
+            "description": "Identity document type.",
+            "enum": [
+              "P",
+              "B",
+              "ID",
+              "BI",
+              "O",
+              "Passaporte",
+              "Passport",
+              "Outro",
+              "Other"
+            ]
+          },
+          "doc_country": {
+            "type": "string",
+            "description": "Issuing country code."
+          },
+          "arrival": {
+            "type": "string",
+            "description": "Arrival date.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "departure": {
+            "type": "string",
+            "description": "Departure date, after arrival.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "country_residence": {
+            "type": "string",
+            "description": "Country of residence code."
+          },
+          "city_residence": {
+            "type": "string",
+            "description": "City of residence.",
+            "maxLength": 30
+          }
+        },
+        "required": [
+          "apid"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "rcode"
+            ]
+          },
+          {
+            "required": [
+              "nationality",
+              "birthday",
+              "doc_id",
+              "doc_type",
+              "doc_country",
+              "arrival",
+              "departure",
+              "country_residence",
+              "city_residence",
+              "name"
+            ]
+          },
+          {
+            "required": [
+              "nationality",
+              "birthday",
+              "doc_id",
+              "doc_type",
+              "doc_country",
+              "arrival",
+              "departure",
+              "country_residence",
+              "city_residence",
+              "first_name",
+              "last_name"
+            ]
+          }
+        ]
+      },
+      "legacy": "sendSIBA",
+      "description": "Submit stored reservation data or explicit guest data.",
+      "group": "siba",
+      "businessRules": [
+        "Require rcode or complete named guest data. Reconcile external submission state before retrying an uncertain result."
+      ]
+    },
+    "getExpenses": {
+      "name": "getExpenses",
+      "method": "GET",
+      "scope": "property",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "date_start": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "date_end": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "apid"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "id"
+            ]
+          },
+          {
+            "required": [
+              "date_start",
+              "date_end"
+            ]
+          }
+        ]
+      },
+      "legacy": "getExpenses",
+      "description": "List expenses by an inclusive document date range or read one expense by id.",
+      "group": "expenses",
+      "businessRules": [
+        "Supply id for one expense without dates, or both date_start and date_end for a list. Optional dates also constrain an id lookup. Results remain an array, empty when no expense matches."
+      ]
+    },
+    "addExpense": {
+      "name": "addExpense",
+      "method": "POST",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "category": {
+            "type": "integer",
+            "description": "Existing expense category ID.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "document": {
+            "type": "string",
+            "description": "Expense document.",
+            "enum": [
+              "invoice",
+              "cnote"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Expense type; credit notes require variable.",
+            "enum": [
+              "fixed",
+              "variable"
+            ]
+          },
+          "vendor": {
+            "type": "string",
+            "description": "Vendor.",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "number": {
+            "type": "string",
+            "description": "Document number.",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "date": {
+            "type": "string",
+            "description": "Document date.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description.",
+            "maxLength": 255
+          },
+          "payment_date": {
+            "type": "string",
+            "description": "Payment date or empty to leave unpaid.",
+            "pattern": "^([0-9]{4}-[0-9]{2}-[0-9]{2})?$"
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Active; default true."
+          },
+          "pmc": {
+            "type": "integer",
+            "description": "0 exclude, 1 invoice expense, 2 deduct expense; default 0.",
+            "minimum": 0,
+            "maximum": 2
+          },
+          "lines": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "description": "Line description.",
+                  "maxLength": 255
+                },
+                "amount": {
+                  "type": "string",
+                  "description": "Nonnegative amount, at most two decimal places.",
+                  "pattern": "^[0-9]{1,10}(\\.[0-9]{1,2})?$"
+                },
+                "vat_rate": {
+                  "type": "string",
+                  "description": "VAT percentage 0 to 100, at most two decimal places.",
+                  "pattern": "^([0-9]{1,2}(\\.[0-9]{1,2})?|100(\\.0{1,2})?)$"
+                }
+              },
+              "required": [
+                "description",
+                "amount",
+                "vat_rate"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Atomic expense lines; the entire signed JSON body must fit 8192 bytes."
+          }
+        },
+        "required": [
+          "apid",
+          "category",
+          "document",
+          "type",
+          "vendor",
+          "number",
+          "date"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "addExpense",
+      "description": "Create an expense, optionally with atomic lines; without lines the header has zero totals.",
+      "group": "expenses",
+      "businessRules": [
+        "document=cnote requires type=variable. Nonzero pmc requires the PMC addon. Requires an active property with the expenses module.",
+        "Optional lines are committed atomically with the header, require transactional InnoDB tables, and are bounded at 20 within the 8192-byte body limit."
+      ]
+    },
+    "addExpenseLine": {
+      "name": "addExpenseLine",
+      "method": "POST",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "description": {
+            "type": "string",
+            "description": "Line description.",
+            "maxLength": 255
+          },
+          "amount": {
+            "type": "string",
+            "description": "Nonnegative amount, at most two decimal places.",
+            "pattern": "^[0-9]{1,10}(\\.[0-9]{1,2})?$"
+          },
+          "vat_rate": {
+            "type": "string",
+            "description": "VAT percentage 0 to 100, at most two decimal places.",
+            "pattern": "^([0-9]{1,2}(\\.[0-9]{1,2})?|100(\\.0{1,2})?)$"
+          }
+        },
+        "required": [
+          "apid",
+          "id",
+          "description",
+          "amount",
+          "vat_rate"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "addExpenseLine",
+      "description": "Add one expense line and recalculate totals.",
+      "group": "expenses"
+    },
+    "deleteExpense": {
+      "name": "deleteExpense",
+      "method": "DELETE",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "apid",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "deleteExpense",
+      "description": "Permanently delete an expense and its lines.",
+      "group": "expenses"
+    },
+    "disableExpense": {
+      "name": "disableExpense",
+      "method": "PATCH",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "apid",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "disableExpense",
+      "description": "Set an expense inactive without deleting its lines.",
+      "group": "expenses"
+    },
+    "getExpenseCategories": {
+      "name": "getExpenseCategories",
+      "method": "GET",
+      "scope": "property",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "apid"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Read the existing expense category choices; only id and type are present in app data.",
+      "group": "expenses",
+      "responseSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Numeric resource/document identity.",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "type": {
+              "type": "string",
+              "description": "Existing expense category label."
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      }
+    },
+    "getInvoices": {
+      "name": "getInvoices",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "series": {
+            "type": "string",
+            "description": "Exact document series."
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "customer_id": {
+            "type": "string",
+            "description": "Exact customer ID/VAT ID."
+          },
+          "date_start": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "date_end": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "doc_type": {
+            "type": "string",
+            "description": "Invoice document type, for example FR or FT."
+          },
+          "source": {
+            "type": "string",
+            "description": "Invoice source; bulk maps to genmissing in the current runtime."
+          },
+          "show_property": {
+            "type": "boolean",
+            "description": "Include property ID and name when known."
+          }
+        },
+        "required": [
+          "invoicing_nif"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "getInvoices",
+      "description": "List fiscal invoices, optionally filtered by reservation/property or document identity.",
+      "group": "invoices",
+      "businessRules": [
+        "When rcode is supplied, apid is required and their relationship must be verified. Any supplied apid must belong to the account.",
+        "For a single document, supply invoicing_nif, series, id and doc_type (FR or FT). An id alone may match multiple series/types. Results remain an array; other supplied filters intersect.",
+        "Do not fabricate a property association for historical standalone documents."
+      ]
+    },
+    "updateInvoicingConfig": {
+      "name": "updateInvoicingConfig",
+      "method": "PATCH",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "cae": {
+            "type": "string",
+            "description": "CAE, or empty to clear.",
+            "pattern": "^([0-9]{4,5})?$"
+          },
+          "sf": {
+            "type": "string",
+            "description": "Finance Service code, or empty to clear.",
+            "pattern": "^([0-9]{4})?$"
+          },
+          "pf_username": {
+            "type": "string",
+            "description": "AT sub-user for this NIF. No spaces; omitted preserves the current value.",
+            "minLength": 1,
+            "maxLength": 20,
+            "pattern": "^[^\\s]+$"
+          },
+          "pf_password": {
+            "type": "string",
+            "description": "Write-only AT password; omitted preserves it. Never returned by the API. Use a private local client, not a shared variable or chat.",
+            "minLength": 1,
+            "maxLength": 16,
+            "pattern": "^[^\\s]+$"
+          },
+          "auto_send_saft": {
+            "type": "boolean",
+            "description": "Automatically send SAF-T."
+          },
+          "auto_send_saft_when": {
+            "type": "integer",
+            "description": "Day of automatic SAF-T delivery.",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "default_irs_incidencia": {
+            "type": "string",
+            "description": "Existing fac_irs_incidencia val, or empty.",
+            "maxLength": 64
+          },
+          "default_irs_retencao": {
+            "type": "string",
+            "description": "Existing fac_irs_retencao val, or empty.",
+            "maxLength": 64
+          },
+          "inv_closed_default": {
+            "type": "boolean",
+            "description": "Existing invoicing setting: inv_closed_default."
+          },
+          "inv_send_email": {
+            "type": "boolean",
+            "description": "Existing invoicing setting: inv_send_email."
+          },
+          "inv_rollover": {
+            "type": "boolean",
+            "description": "Existing invoicing setting: inv_rollover."
+          },
+          "credit_note_on_cancel": {
+            "type": "boolean",
+            "description": "Existing invoicing setting: credit_note_on_cancel."
+          },
+          "auto_gen_pdf": {
+            "type": "boolean",
+            "description": "Existing invoicing setting: auto_gen_pdf."
+          },
+          "inv_current_account": {
+            "type": "boolean",
+            "description": "Existing invoicing setting: inv_current_account."
+          },
+          "iban": {
+            "type": "string",
+            "description": "IBAN without spaces, or empty.",
+            "pattern": "^([A-Za-z]{2}[A-Za-z0-9]{13,32})?$"
+          },
+          "capital": {
+            "type": "string",
+            "description": "Registered capital, or empty.",
+            "pattern": "^([0-9]+(\\.[0-9]{1,2})?)?$",
+            "maxLength": 20
+          },
+          "office": {
+            "type": "string",
+            "description": "Registered office.",
+            "maxLength": 255
+          },
+          "tax_id": {
+            "type": "string",
+            "description": "Additional tax identity.",
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "invoicing_nif"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "cae"
+            ]
+          },
+          {
+            "required": [
+              "sf"
+            ]
+          },
+          {
+            "required": [
+              "pf_username"
+            ]
+          },
+          {
+            "required": [
+              "pf_password"
+            ]
+          },
+          {
+            "required": [
+              "auto_send_saft"
+            ]
+          },
+          {
+            "required": [
+              "auto_send_saft_when"
+            ]
+          },
+          {
+            "required": [
+              "default_irs_incidencia"
+            ]
+          },
+          {
+            "required": [
+              "default_irs_retencao"
+            ]
+          },
+          {
+            "required": [
+              "inv_closed_default"
+            ]
+          },
+          {
+            "required": [
+              "inv_send_email"
+            ]
+          },
+          {
+            "required": [
+              "inv_rollover"
+            ]
+          },
+          {
+            "required": [
+              "credit_note_on_cancel"
+            ]
+          },
+          {
+            "required": [
+              "auto_gen_pdf"
+            ]
+          },
+          {
+            "required": [
+              "inv_current_account"
+            ]
+          },
+          {
+            "required": [
+              "iban"
+            ]
+          },
+          {
+            "required": [
+              "capital"
+            ]
+          },
+          {
+            "required": [
+              "office"
+            ]
+          },
+          {
+            "required": [
+              "tax_id"
+            ]
+          }
+        ]
+      },
+      "description": "Update supplied invoicing settings for an existing authorized NIF.",
+      "group": "invoicing-config",
+      "businessRules": [
+        "Supply at least one editable field; omitted fields remain unchanged. No generic fac_config column access or NIF/owner changes.",
+        "For a Portuguese account, the effective AT username must use the selected NIF. The password is write-only and not echoed or logged by the API.",
+        "Validate IRS choices against the existing catalogs. This does not test AT credentials or change banking/LLM configuration."
+      ]
+    },
+    "getSeries": {
+      "name": "getSeries",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          }
+        },
+        "required": [
+          "invoicing_nif"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "getSeries",
+      "description": "Read available invoicing series.",
+      "group": "series"
+    },
+    "addSeries": {
+      "name": "addSeries",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "series": {
+            "type": "string",
+            "description": "Series identifier; PT identifiers cannot start with AT.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "invoice_type": {
+            "type": "string",
+            "description": "Series document type.",
+            "enum": [
+              "FR",
+              "FT",
+              "RG"
+            ]
+          },
+          "cae": {
+            "type": "string",
+            "description": "Series CAE; omission uses the current invoicing CAE.",
+            "pattern": "^[0-9]{4,5}$"
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "series",
+          "invoice_type"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Create and register a new invoicing series.",
+      "group": "series",
+      "businessRules": [
+        "Register new Portuguese series with AT before storing the returned validation code. Creating FT also ensures the associated RG series.",
+        "An existing series, active or inactive, returns conflict. The app stores locally inactive and AT-finalized series identically; reactivation is not exposed by this operation.",
+        "External AT registration and local SQL cannot be one transaction. Reconcile uncertain AT/SQL outcomes before any new attempt; never blindly retry.",
+        "No default-series/property configuration is changed. Series creation requires the existing ATCUD module on the origin."
+      ]
+    },
+    "disableSeries": {
+      "name": "disableSeries",
+      "method": "PATCH",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "series": {
+            "type": "string",
+            "description": "Series identifier; PT identifiers cannot start with AT.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "invoice_type": {
+            "type": "string",
+            "description": "Series document type.",
+            "enum": [
+              "FR",
+              "FT",
+              "RG"
+            ]
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "series",
+          "invoice_type"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Locally deactivate one document-type series without finalizing it at AT.",
+      "group": "series",
+      "businessRules": [
+        "Deactivation is local only: no AT call and no irreversible fiscal closure. Preserve all historical documents and the AT validation code.",
+        "Clear this series default flag. Existing property references are preserved, but new v2 invoice creation rejects an inactive series.",
+        "Reactivation stays managed in the app. FT and RG are distinct identities; disabling one does not disable the other."
+      ]
+    },
+    "getProducts": {
+      "name": "getProducts",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          }
+        },
+        "required": [
+          "invoicing_nif"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "getProducts",
+      "description": "Read existing fiscal products.",
+      "group": "products"
+    },
+    "addProduct": {
+      "name": "addProduct",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "product_id": {
+            "type": "string",
+            "description": "Product code.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "description": {
+            "type": "string",
+            "description": "Product description.",
+            "minLength": 2,
+            "maxLength": 255
+          },
+          "price": {
+            "type": "string",
+            "description": "Nonnegative unit price; decimal text.",
+            "pattern": "^[0-9]+(\\.[0-9]+)?$"
+          },
+          "vat": {
+            "type": "string",
+            "description": "VAT percentage from the selected region catalog.",
+            "pattern": "^[0-9]{1,2}(\\.[0-9]{1,2})?$"
+          },
+          "reason_code": {
+            "type": "string",
+            "description": "Existing exemption code; required for zero VAT.",
+            "pattern": "^[A-Za-z0-9._-]{0,16}$"
+          },
+          "region": {
+            "type": "string",
+            "description": "Fiscal region; default PT.",
+            "enum": [
+              "PT",
+              "PT-MA",
+              "PT-AC"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Product type; default S.",
+            "enum": [
+              "S",
+              "P",
+              "I"
+            ]
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "product_id",
+          "description",
+          "price",
+          "vat"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Create a fiscal product without overwriting an existing product.",
+      "group": "products",
+      "businessRules": [
+        "Validate VAT and exemption codes against fac_vat/fac_vat_isencoes. Nonzero VAT cannot have an exemption code.",
+        "New products are not configured as defaults. Duplicate product IDs within the account/NIF return product_exists."
+      ]
+    },
+    "deleteProduct": {
+      "name": "deleteProduct",
+      "method": "DELETE",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "product_id": {
+            "type": "string",
+            "description": "Product code.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "product_id"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Delete a product only when no invoice line or property default uses it.",
+      "group": "products",
+      "businessRules": [
+        "Return 409 product_in_use for any referencing invoice line, including draft, final or cancelled invoices, or a property default.",
+        "Lock the product and check references within one transaction. V2 invoice line insertion shares the product-row lock; existing v1 writers are unchanged."
+      ]
+    },
+    "getReceipts": {
+      "name": "getReceipts",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "series": {
+            "type": "string",
+            "description": "Exact document series."
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "customer_id": {
+            "type": "string",
+            "description": "Exact customer ID/VAT ID."
+          },
+          "date_start": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "date_end": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "invoicing_nif"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "getReceipts",
+      "description": "List receipts or read one by its document identity.",
+      "group": "invoices",
+      "businessRules": [
+        "For a single document, supply invoicing_nif, series and id. An id alone may match multiple series. Results remain an array; other supplied filters intersect."
+      ]
+    },
+    "getCreditNotes": {
+      "name": "getCreditNotes",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "series": {
+            "type": "string",
+            "description": "Exact document series."
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "customer_id": {
+            "type": "string",
+            "description": "Exact customer ID/VAT ID."
+          },
+          "date_start": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "date_end": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "invoice_type": {
+            "type": "string",
+            "description": "Referenced invoice type; default FR.",
+            "enum": [
+              "FR",
+              "FT"
+            ]
+          }
+        },
+        "required": [
+          "invoicing_nif"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "getCreditNotes",
+      "description": "List credit notes or read one by its document identity.",
+      "group": "invoices",
+      "businessRules": [
+        "For a single document, supply invoicing_nif, series and id; invoice_type selects the referenced invoice type (default FR, use FT when applicable). An id alone may match multiple series. Results remain an array; other supplied filters intersect."
+      ]
+    },
+    "addInvoice": {
+      "name": "addInvoice",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "series": {
+            "type": "string",
+            "description": "Document series; omission uses the configured default series."
+          },
+          "invoice_type": {
+            "type": "string",
+            "description": "Invoice type; default FR.",
+            "enum": [
+              "FR",
+              "FT"
+            ]
+          },
+          "customer_id": {
+            "type": "string",
+            "description": "Customer ID/VAT ID; empty string means final consumer."
+          },
+          "name": {
+            "type": "string",
+            "description": "Customer name."
+          },
+          "country": {
+            "type": "string",
+            "description": "ICAO country code."
+          },
+          "address": {
+            "type": "string",
+            "description": "Customer address."
+          },
+          "cp": {
+            "type": "string",
+            "description": "Customer postal code; default 0000-000."
+          },
+          "city": {
+            "type": "string",
+            "description": "Customer city; default -."
+          },
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Exact reservation code.",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "comment": {
+            "type": "string",
+            "description": "Invoice comment."
+          },
+          "payment_method": {
+            "type": "string",
+            "description": "Payment method; default TB.",
+            "pattern": "^[A-Za-z0-9._-]{1,20}$"
+          },
+          "lines": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": {
+                  "type": "string",
+                  "description": "Product code.",
+                  "pattern": "^[A-Za-z0-9._-]{1,64}$"
+                },
+                "custom_descr": {
+                  "type": "string",
+                  "description": "Line description."
+                },
+                "qty": {
+                  "type": "string",
+                  "description": "Quantity.",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+                },
+                "price": {
+                  "type": "string",
+                  "description": "Nonnegative unit price.",
+                  "pattern": "^[0-9]+(\\.[0-9]+)?$"
+                },
+                "discount": {
+                  "type": "string",
+                  "description": "Line discount.",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+                },
+                "vat": {
+                  "type": "string",
+                  "description": "VAT percentage.",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+                },
+                "reason_code": {
+                  "type": "string",
+                  "description": "Exemption reason code, or empty string.",
+                  "pattern": "^[A-Za-z0-9._-]*$"
+                },
+                "region": {
+                  "type": "string",
+                  "description": "Fiscal product region; default PT.",
+                  "enum": [
+                    "PT",
+                    "PT-MA",
+                    "PT-AC"
+                  ]
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Product type; default S.",
+                  "enum": [
+                    "S",
+                    "P",
+                    "I"
+                  ]
+                }
+              },
+              "required": [
+                "product_id",
+                "custom_descr",
+                "qty",
+                "price",
+                "discount",
+                "vat",
+                "reason_code"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Atomic invoice lines; the entire signed JSON body must fit 8192 bytes."
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "customer_id",
+          "name",
+          "country"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "addInvoice",
+      "description": "Create an open fiscal invoice; rcode is optional. Add lines and close it explicitly.",
+      "group": "invoices",
+      "businessRules": [
+        "When rcode is supplied, require apid and verify the reservation belongs to that property/account.",
+        "Validate authorized NIF/series. Optional lines are committed atomically with the draft, require transactional InnoDB tables, and are bounded at 20 within the 8192-byte body limit. Closing is always explicit."
+      ]
+    },
+    "addInvoiceLine": {
+      "name": "addInvoiceLine",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "series": {
+            "type": "string",
+            "description": "Document series; omission uses the configured default series."
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "invoice_type": {
+            "type": "string",
+            "description": "Invoice type; default FR.",
+            "enum": [
+              "FR",
+              "FT"
+            ]
+          },
+          "product_id": {
+            "type": "string",
+            "description": "Product code.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "custom_descr": {
+            "type": "string",
+            "description": "Line description."
+          },
+          "qty": {
+            "type": "string",
+            "description": "Quantity.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "price": {
+            "type": "string",
+            "description": "Nonnegative unit price.",
+            "pattern": "^[0-9]+(\\.[0-9]+)?$"
+          },
+          "discount": {
+            "type": "string",
+            "description": "Line discount.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "vat": {
+            "type": "string",
+            "description": "VAT percentage.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "reason_code": {
+            "type": "string",
+            "description": "Exemption reason code, or empty string.",
+            "pattern": "^[A-Za-z0-9._-]*$"
+          },
+          "region": {
+            "type": "string",
+            "description": "Fiscal product region; default PT.",
+            "enum": [
+              "PT",
+              "PT-MA",
+              "PT-AC"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Product type; default S.",
+            "enum": [
+              "S",
+              "P",
+              "I"
+            ]
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "id",
+          "product_id",
+          "custom_descr",
+          "qty",
+          "price",
+          "discount",
+          "vat",
+          "reason_code"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "addInvoiceLine",
+      "description": "Add one line to an open invoice, creating a product if needed.",
+      "group": "invoices"
+    },
+    "addInvoiceLines": {
+      "name": "addInvoiceLines",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "series": {
+            "type": "string",
+            "description": "Document series; omission uses the configured default series."
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "invoice_type": {
+            "type": "string",
+            "description": "Invoice type; default FR.",
+            "enum": [
+              "FR",
+              "FT"
+            ]
+          },
+          "lines": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": {
+                  "type": "string",
+                  "description": "Product code.",
+                  "pattern": "^[A-Za-z0-9._-]{1,64}$"
+                },
+                "custom_descr": {
+                  "type": "string",
+                  "description": "Line description."
+                },
+                "qty": {
+                  "type": "string",
+                  "description": "Quantity.",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+                },
+                "price": {
+                  "type": "string",
+                  "description": "Nonnegative unit price.",
+                  "pattern": "^[0-9]+(\\.[0-9]+)?$"
+                },
+                "discount": {
+                  "type": "string",
+                  "description": "Line discount.",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+                },
+                "vat": {
+                  "type": "string",
+                  "description": "VAT percentage.",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+                },
+                "reason_code": {
+                  "type": "string",
+                  "description": "Exemption reason code, or empty string.",
+                  "pattern": "^[A-Za-z0-9._-]*$"
+                },
+                "region": {
+                  "type": "string",
+                  "description": "Fiscal product region; default PT.",
+                  "enum": [
+                    "PT",
+                    "PT-MA",
+                    "PT-AC"
+                  ]
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Product type; default S.",
+                  "enum": [
+                    "S",
+                    "P",
+                    "I"
+                  ]
+                }
+              },
+              "required": [
+                "product_id",
+                "custom_descr",
+                "qty",
+                "price",
+                "discount",
+                "vat",
+                "reason_code"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Atomic invoice lines; the entire signed JSON body must fit 8192 bytes."
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "id",
+          "lines"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Atomically add a bounded batch of lines to an open invoice; close it explicitly.",
+      "group": "invoices",
+      "businessRules": [
+        "Validate authorized NIF/series and open invoice identity. Requires transactional InnoDB tables. No automatic invoice closing.",
+        "At most 20 lines; the entire signed JSON body must fit 8192 bytes."
+      ]
+    },
+    "closeInvoice": {
+      "name": "closeInvoice",
+      "method": "PATCH",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "series": {
+            "type": "string",
+            "description": "Document series; omission uses the configured default series."
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "invoice_type": {
+            "type": "string",
+            "description": "Invoice type; default FR.",
+            "enum": [
+              "FR",
+              "FT"
+            ]
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "closeInvoice",
+      "description": "Explicitly finalize an open fiscal invoice; verify data and totals first.",
+      "group": "invoices"
+    },
+    "deleteInvoice": {
+      "name": "deleteInvoice",
+      "method": "DELETE",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "series": {
+            "type": "string",
+            "description": "Document series; omission uses the configured default series."
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "invoice_type": {
+            "type": "string",
+            "description": "Invoice type; default FR.",
+            "enum": [
+              "FR",
+              "FT"
+            ]
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "deleteInvoice",
+      "description": "Delete an open invoice only when the fiscal workflow permits it.",
+      "group": "invoices"
+    },
+    "addReceipt": {
+      "name": "addReceipt",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "refseries": {
+            "type": "string",
+            "description": "Referenced invoice series."
+          },
+          "refid": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "refseries",
+          "refid"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "addReceipt",
+      "description": "Create a receipt for an FT invoice.",
+      "group": "invoices"
+    },
+    "addCreditNote": {
+      "name": "addCreditNote",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "refseries": {
+            "type": "string",
+            "description": "Referenced invoice series."
+          },
+          "refid": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "invoice_type": {
+            "type": "string",
+            "description": "Invoice type; default FR.",
+            "enum": [
+              "FR",
+              "FT"
+            ]
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "refseries",
+          "refid"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "addCreditNote",
+      "description": "Create a credit note for a closed invoice.",
+      "group": "invoices"
+    },
+    "generateSAFT": {
+      "name": "generateSAFT",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "year": {
+            "type": "integer",
+            "description": "Calendar year.",
+            "minimum": 1000,
+            "maximum": 9999
+          },
+          "month": {
+            "type": "integer",
+            "description": "Calendar month.",
+            "minimum": 1,
+            "maximum": 12
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "year",
+          "month"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "generateSAFT",
+      "description": "Generate a SAF-T file for an authorized fiscal account.",
+      "group": "invoices"
+    },
+    "getSAFT": {
+      "name": "getSAFT",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "year": {
+            "type": "integer",
+            "description": "Calendar year.",
+            "minimum": 1000,
+            "maximum": 9999
+          },
+          "month": {
+            "type": "integer",
+            "description": "Calendar month.",
+            "minimum": 1,
+            "maximum": 12
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "year",
+          "month"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "getSAFT",
+      "description": "Read an already generated SAF-T file as base64 content.",
+      "group": "invoices"
+    },
+    "generateModelo30": {
+      "name": "generateModelo30",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "year": {
+            "type": "integer",
+            "description": "Calendar year.",
+            "minimum": 1000,
+            "maximum": 9999
+          },
+          "month": {
+            "type": "integer",
+            "description": "Calendar month.",
+            "minimum": 1,
+            "maximum": 12
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "year",
+          "month"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Generate and store the monthly Modelo 30 XML; this does not submit it to AT.",
+      "group": "modelo30",
+      "businessRules": [
+        "Requires a configured Finance Service code. Month is an integer 1..12 and is stored/formatted as two digits.",
+        "Include channel commissions for reservations with closed invoices in the selected period, excluding credited documents and reservations assigned to another Modelo 30 period. Include saved monthly and recurring manual transactions.",
+        "Regeneration replaces only this period. No eligible data returns 409 no_data without deleting a previous document or tracking.",
+        "Serialize generation per account/NIF; publish the XML by atomic rename after the SQL commit. Publication failure returns document_publication_pending and requires operator reconciliation.",
+        "The output is the existing ISO-8859-1 XML format. File generation is not declaration submission or legal validation."
+      ]
+    },
+    "getModelo30": {
+      "name": "getModelo30",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "year": {
+            "type": "integer",
+            "description": "Calendar year.",
+            "minimum": 1000,
+            "maximum": 9999
+          },
+          "month": {
+            "type": "integer",
+            "description": "Calendar month.",
+            "minimum": 1,
+            "maximum": 12
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "year",
+          "month"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Read an already generated monthly Modelo 30 XML as Base64 JSON.",
+      "group": "modelo30",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "content_base64": {
+            "type": "string",
+            "description": "Base64 of the original XML bytes."
+          },
+          "content_type": {
+            "type": "string",
+            "description": "application/xml"
+          },
+          "filename": {
+            "type": "string",
+            "description": "XML filename."
+          }
+        },
+        "required": [
+          "content_base64",
+          "content_type",
+          "filename"
+        ],
+        "additionalProperties": false
+      },
+      "businessRules": [
+        "Verify account/NIF ownership before file access. No public download token URLs or AT credentials are exposed. Missing XML returns document_not_found."
+      ]
+    },
+    "getRentalContracts": {
+      "name": "getRentalContracts",
+      "method": "GET",
+      "scope": "property",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "contract_ref": {
+            "type": "string",
+            "description": "Exact contract reference returned by addRentalContract.",
+            "pattern": "^[A-Za-z0-9._-]{1,128}$"
+          }
+        },
+        "required": [
+          "apid"
+        ],
+        "additionalProperties": false
+      },
+      "description": "List rental contracts or read one by id or contract_ref.",
+      "group": "contracts",
+      "businessRules": [
+        "Requires the rental-contract module and an ARRE property. Scope every contract and tenant to the authenticated owner and apid.",
+        "Omit selectors to list contracts; supply id or contract_ref for an individual lookup. If both are supplied, both must match. Results remain an array, empty when no contract matches.",
+        "Return saved contract fields and tenants; never return internal AT response diagnostics or credentials."
+      ]
+    },
+    "addRentalContract": {
+      "name": "addRentalContract",
+      "method": "POST",
+      "scope": "property",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "artigo": {
+            "type": "string",
+            "description": "Fiscal article.",
+            "minLength": 1,
+            "maxLength": 10
+          },
+          "fracao": {
+            "type": "string",
+            "description": "Fraction.",
+            "maxLength": 10
+          },
+          "contract_type": {
+            "type": "string",
+            "description": "Contract type.",
+            "enum": [
+              "ARREND",
+              "SUBARR",
+              "PROMES",
+              "CEDENC",
+              "ALUGUE"
+            ]
+          },
+          "purpose": {
+            "type": "string",
+            "description": "Purpose.",
+            "enum": [
+              "H_PERM",
+              "H_NPER",
+              "N_HABI"
+            ]
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date.",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "End date or empty.",
+            "pattern": "^([0-9]{4}-[0-9]{2}-[0-9]{2})?$"
+          },
+          "rent": {
+            "type": "string",
+            "description": "Rent.",
+            "pattern": "^[0-9]+(\\.[0-9]+)?$"
+          },
+          "deposit": {
+            "type": "string",
+            "description": "Deposit; default 0.",
+            "pattern": "^[0-9]+(\\.[0-9]+)?$"
+          },
+          "renewable": {
+            "type": "boolean",
+            "description": "Renewable; default false."
+          },
+          "rent_period": {
+            "type": "string",
+            "description": "Rent period; default MENSAL.",
+            "enum": [
+              "MENSAL",
+              "MENORM"
+            ]
+          },
+          "parte_comum": {
+            "type": "boolean",
+            "description": "Common part; default false."
+          },
+          "parte_arrendada": {
+            "type": "string",
+            "description": "Rented part; required when parte_comum is true.",
+            "maxLength": 255
+          },
+          "send_invoice_by_email": {
+            "type": "boolean",
+            "description": "Send invoice by email; default false."
+          },
+          "tenants": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Tenant name.",
+                  "minLength": 1,
+                  "maxLength": 170
+                },
+                "country": {
+                  "type": "string",
+                  "description": "Existing ICAO/ISO country code.",
+                  "minLength": 1
+                },
+                "nif": {
+                  "type": "string",
+                  "description": "Optional Portuguese VAT ID.",
+                  "pattern": "^([0-9]{9})?$"
+                },
+                "id_document": {
+                  "type": "string",
+                  "description": "Identity document.",
+                  "maxLength": 100
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Optional tenant email."
+                }
+              },
+              "required": [
+                "name",
+                "country"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "apid",
+          "artigo",
+          "contract_type",
+          "purpose",
+          "start_date",
+          "rent",
+          "tenants"
+        ],
+        "additionalProperties": false
+      },
+      "legacy": "addRentalContract",
+      "description": "Create a draft rental contract for an ARRE property; automatic invoicing stays disabled.",
+      "group": "contracts",
+      "businessRules": [
+        "Requires the rental-contract module and an ARRE property. parte_comum=true requires nonempty parte_arrendada.",
+        "Tenant arrays are bounded at 20 and the whole UTF-8 body at 8192 bytes. Validate actual calendar dates and countries."
+      ]
+    },
+    "getCityTaxDeclarations": {
+      "name": "getCityTaxDeclarations",
+      "method": "GET",
+      "scope": "property",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "id": {
+            "type": "string",
+            "description": "Source-qualified opaque declaration identity, not a numeric database ID.",
+            "pattern": "^(tmtai|itaxas):[A-Za-z0-9_-][A-Za-z0-9_.-]{0,127}$"
+          },
+          "source": {
+            "type": "string",
+            "description": "Declaration source; part of its identity.",
+            "enum": [
+              "tmtai",
+              "itaxas"
+            ]
+          },
+          "uniqid": {
+            "type": "string",
+            "description": "Opaque declaration identity from the selected source.",
+            "pattern": "^[A-Za-z0-9._-]+$",
+            "maxLength": 128
+          },
+          "year": {
+            "type": "integer",
+            "description": "Calendar year.",
+            "minimum": 1000,
+            "maximum": 9999
+          },
+          "month": {
+            "type": "integer",
+            "description": "Calendar month.",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "quarter": {
+            "type": "integer",
+            "description": "Quarter, distinct from month.",
+            "minimum": 1,
+            "maximum": 4
+          },
+          "status": {
+            "type": "string",
+            "description": "Exact source status: do not collapse submitted, paid and settled states."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Result limit; default 25.",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Result offset; default 0.",
+            "minimum": 0,
+            "maximum": 2147483647
+          }
+        },
+        "required": [
+          "apid"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Read city-tax declarations with their local PDF in document as base64 JSON, or null when no local PDF is available.",
+      "group": "tmt",
+      "businessRules": [
+        "uniqid requires source. Month and quarter are mutually exclusive and require year. Conflicting declaration identities must be rejected.",
+        "Validate source-specific periods and states. iTaxas keeps its stored numeric month when historical periodicity is unknown.",
+        "Grouped declarations appear once and must include the requested property. Never expose municipal credentials or internal error text.",
+        "Returns declarations, limit, offset and has_more. Each declaration contains document: {content_base64, content_type, filename} for an available local TMTAI PDF, otherwise null.",
+        "document_available is distinct from document_supported. Remote iTaxas documents are not fetched and token URLs are never returned. Invalid local PDF content returns invalid_document. Local files are bounded at 50 MiB; delivery additionally requires the page to fit 60 MiB of encoded document JSON, below the 64 MiB HTTP ceiling. An oversized page, including an individual PDF too large after Base64 encoding, returns HTTP 413 response_too_large. Use an identity or a smaller limit for multi-document pages.",
+        "A source-qualified identity lookup rejects duplicate identities and returns not_found when no declaration matches."
+      ],
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "declarations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Source-qualified opaque declaration identity, not a numeric database ID.",
+                  "pattern": "^(tmtai|itaxas):[A-Za-z0-9_-][A-Za-z0-9_.-]{0,127}$"
+                },
+                "source": {
+                  "type": "string",
+                  "description": "Declaration source; part of its identity.",
+                  "enum": [
+                    "tmtai",
+                    "itaxas"
+                  ]
+                },
+                "uniqid": {
+                  "type": "string",
+                  "description": "Opaque declaration identity from the selected source.",
+                  "pattern": "^[A-Za-z0-9._-]+$",
+                  "maxLength": 128
+                },
+                "codigo_al": {
+                  "type": "string",
+                  "description": "Saved property registration(s)."
+                },
+                "rn_type": {
+                  "type": "string",
+                  "description": "Saved registration type."
+                },
+                "municipality": {
+                  "type": "string",
+                  "description": "Saved municipality."
+                },
+                "number": {
+                  "type": "string",
+                  "description": "Saved declaration number."
+                },
+                "submitted_at": {
+                  "type": "string",
+                  "description": "Saved submission timestamp."
+                },
+                "period": {
+                  "type": "object",
+                  "properties": {
+                    "year": {
+                      "type": "integer",
+                      "description": "Calendar year.",
+                      "minimum": 1000,
+                      "maximum": 9999
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Period kind.",
+                      "enum": [
+                        "month",
+                        "quarter"
+                      ]
+                    },
+                    "value": {
+                      "type": "integer",
+                      "description": "Month or quarter number.",
+                      "minimum": 1,
+                      "maximum": 12
+                    }
+                  },
+                  "required": [
+                    "year",
+                    "type",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "status": {
+                  "type": "string",
+                  "description": "TMTAI status."
+                },
+                "state_code": {
+                  "type": "string",
+                  "description": "iTaxas state code."
+                },
+                "document_available": {
+                  "type": "boolean",
+                  "description": "Source has a document."
+                },
+                "document_supported": {
+                  "type": "boolean",
+                  "description": "Local document delivery is supported."
+                },
+                "document": {
+                  "type": "object",
+                  "properties": {
+                    "content_base64": {
+                      "type": "string",
+                      "description": "Base64 PDF bytes."
+                    },
+                    "content_type": {
+                      "type": "string",
+                      "description": "Media type.",
+                      "enum": [
+                        "application/pdf"
+                      ]
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Declaration PDF filename."
+                    }
+                  },
+                  "required": [
+                    "content_base64",
+                    "content_type",
+                    "filename"
+                  ],
+                  "additionalProperties": false,
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "source",
+                "uniqid",
+                "codigo_al",
+                "rn_type",
+                "municipality",
+                "number",
+                "submitted_at",
+                "period",
+                "document_available",
+                "document_supported",
+                "document"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Page limit.",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Page offset.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "More declarations match."
+          }
+        },
+        "required": [
+          "declarations",
+          "limit",
+          "offset",
+          "has_more"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "getUsers": {
+      "name": "getUsers",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address.",
+            "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+            "maxLength": 254
+          },
+          "username": {
+            "type": "string",
+            "description": "Email address.",
+            "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+            "maxLength": 254
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Result limit; default 25.",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Result offset; default 0.",
+            "minimum": 0,
+            "maximum": 2147483647
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "description": "List service users of the authenticated account; exclude authentication data.",
+      "group": "users",
+      "businessRules": [
+        "username is an alternative email selector; reject conflicting identities. Returns users, limit, offset and has_more."
+      ]
+    },
+    "addUser": {
+      "name": "addUser",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address.",
+            "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+            "maxLength": 254
+          },
+          "name": {
+            "type": "string",
+            "description": "Service user display name.",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "phone": {
+            "type": "string",
+            "description": "Service contact phone.",
+            "pattern": "^[0-9+() .-]{0,64}$"
+          },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "phone": {
+                "type": "string",
+                "description": "Service contact phone; alternative to the top-level phone.",
+                "pattern": "^[0-9+() .-]{0,64}$"
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "language": {
+            "type": "string",
+            "description": "Existing app language code.",
+            "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})?$"
+          },
+          "property_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Assigned property ID belonging to this account.",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "maxItems": 100,
+            "description": "Explicit property assignments, replacing the account relationship only when supplied. All IDs require ownership checks."
+          },
+          "permissions": {
+            "type": "object",
+            "properties": {
+              "open_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: open_reservations."
+              },
+              "create_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: create_reservations."
+              },
+              "change_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: change_reservations."
+              },
+              "archive_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: archive_reservations."
+              },
+              "financials_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: financials_reservations."
+              },
+              "view_archive_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: view_archive_reservations."
+              },
+              "change_handling": {
+                "type": "boolean",
+                "description": "Existing service permission: change_handling."
+              },
+              "notes_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: notes_reservations."
+              },
+              "view_guestdata": {
+                "type": "boolean",
+                "description": "Existing service permission: view_guestdata."
+              },
+              "edit_columns": {
+                "type": "boolean",
+                "description": "Existing service permission: edit_columns."
+              },
+              "view_expenses": {
+                "type": "boolean",
+                "description": "Existing service permission: view_expenses."
+              },
+              "send_emails": {
+                "type": "boolean",
+                "description": "Existing service permission: send_emails."
+              },
+              "checkin_emails": {
+                "type": "boolean",
+                "description": "Existing service permission: checkin_emails."
+              },
+              "emails_360city": {
+                "type": "boolean",
+                "description": "Existing service permission: emails_360city."
+              },
+              "view_stats": {
+                "type": "boolean",
+                "description": "Existing service permission: view_stats."
+              },
+              "count_inventory": {
+                "type": "boolean",
+                "description": "Existing service permission: count_inventory."
+              },
+              "add_inventory": {
+                "type": "boolean",
+                "description": "Existing service permission: add_inventory."
+              },
+              "view_tmt_report": {
+                "type": "boolean",
+                "description": "Existing service permission: view_tmt_report."
+              },
+              "view_attributed_only": {
+                "type": "boolean",
+                "description": "Existing service permission: view_attributed_only."
+              },
+              "view_pmc_report": {
+                "type": "boolean",
+                "description": "Existing service permission: view_pmc_report."
+              },
+              "calendar_reservations": {
+                "type": "integer",
+                "description": "Calendar permission: 0 none, 1 calendar, 2 calendar only.",
+                "minimum": 0,
+                "maximum": 2
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "email",
+          "name",
+          "property_ids"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Create a service user with explicit property assignments; no automatic invitation is sent.",
+      "group": "users",
+      "businessRules": [
+        "Validate property ownership and identity conflicts within the existing app rules. Existing administrator/service identities are rejected.",
+        "Missing permissions grant nothing. No password or administrator role is accepted. Account context comes only from authentication.",
+        "Use phone or contact, not both. Fiscal permissions must be managed in the application, not through this operation.",
+        "Only the authenticated account relationship may be changed. Confirm an uncertain write outcome before retrying."
+      ]
+    },
+    "updateUser": {
+      "name": "updateUser",
+      "method": "PATCH",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address.",
+            "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+            "maxLength": 254
+          },
+          "name": {
+            "type": "string",
+            "description": "Service user display name.",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "phone": {
+            "type": "string",
+            "description": "Service contact phone.",
+            "pattern": "^[0-9+() .-]{0,64}$"
+          },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "phone": {
+                "type": "string",
+                "description": "Service contact phone; alternative to the top-level phone.",
+                "pattern": "^[0-9+() .-]{0,64}$"
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "language": {
+            "type": "string",
+            "description": "Existing app language code.",
+            "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})?$"
+          },
+          "property_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Assigned property ID belonging to this account.",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "maxItems": 100,
+            "description": "Explicit property assignments, replacing the account relationship only when supplied. All IDs require ownership checks."
+          },
+          "permissions": {
+            "type": "object",
+            "properties": {
+              "open_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: open_reservations."
+              },
+              "create_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: create_reservations."
+              },
+              "change_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: change_reservations."
+              },
+              "archive_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: archive_reservations."
+              },
+              "financials_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: financials_reservations."
+              },
+              "view_archive_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: view_archive_reservations."
+              },
+              "change_handling": {
+                "type": "boolean",
+                "description": "Existing service permission: change_handling."
+              },
+              "notes_reservations": {
+                "type": "boolean",
+                "description": "Existing service permission: notes_reservations."
+              },
+              "view_guestdata": {
+                "type": "boolean",
+                "description": "Existing service permission: view_guestdata."
+              },
+              "edit_columns": {
+                "type": "boolean",
+                "description": "Existing service permission: edit_columns."
+              },
+              "view_expenses": {
+                "type": "boolean",
+                "description": "Existing service permission: view_expenses."
+              },
+              "send_emails": {
+                "type": "boolean",
+                "description": "Existing service permission: send_emails."
+              },
+              "checkin_emails": {
+                "type": "boolean",
+                "description": "Existing service permission: checkin_emails."
+              },
+              "emails_360city": {
+                "type": "boolean",
+                "description": "Existing service permission: emails_360city."
+              },
+              "view_stats": {
+                "type": "boolean",
+                "description": "Existing service permission: view_stats."
+              },
+              "count_inventory": {
+                "type": "boolean",
+                "description": "Existing service permission: count_inventory."
+              },
+              "add_inventory": {
+                "type": "boolean",
+                "description": "Existing service permission: add_inventory."
+              },
+              "view_tmt_report": {
+                "type": "boolean",
+                "description": "Existing service permission: view_tmt_report."
+              },
+              "view_attributed_only": {
+                "type": "boolean",
+                "description": "Existing service permission: view_attributed_only."
+              },
+              "view_pmc_report": {
+                "type": "boolean",
+                "description": "Existing service permission: view_pmc_report."
+              },
+              "calendar_reservations": {
+                "type": "integer",
+                "description": "Calendar permission: 0 none, 1 calendar, 2 calendar only.",
+                "minimum": 0,
+                "maximum": 2
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "name"
+            ]
+          },
+          {
+            "required": [
+              "phone"
+            ]
+          },
+          {
+            "required": [
+              "contact"
+            ]
+          },
+          {
+            "required": [
+              "language"
+            ]
+          },
+          {
+            "required": [
+              "property_ids"
+            ]
+          },
+          {
+            "required": [
+              "permissions"
+            ]
+          }
+        ]
+      },
+      "description": "Update the service user relationship identified by email; email itself cannot be changed.",
+      "group": "users",
+      "businessRules": [
+        "Require an editable field besides email. Omitted fields/permissions remain unchanged; a supplied property_ids replaces only this account assignment.",
+        "Use phone or contact, not both. Fiscal permissions stay managed in the application.",
+        "Shared-profile edits return conflict and must be managed in the app; account relationship permissions may be updated independently.",
+        "Validate every property. Never modify another account relationship or grant administrator access."
+      ]
+    }
+  },
+  "examples": {
+    "getLicense": {},
+    "getProperties": {},
+    "addProperty": {
+      "property_name": "Example Apartment",
+      "address": "Rua Exemplo 1",
+      "zip": "1000-001",
+      "city": "Lisboa",
+      "license_number": "12345"
+    },
+    "updateProperty": {
+      "apid": 123,
+      "default_checkin": 16
+    },
+    "getReservations": {
+      "apid": 123,
+      "rcode": "ABC123"
+    },
+    "addReservation": {
+      "apid": 123,
+      "rcode": "ABC123",
+      "check_in": "2026-10-10 16:00",
+      "check_out": "2026-10-12 11:00",
+      "name": "Example Person",
+      "create_payment": false
+    },
+    "updateReservation": {
+      "apid": 123,
+      "rcode": "ABC123",
+      "phone": "+351210000000"
+    },
+    "cancelReservation": {
+      "apid": 123,
+      "rcode": "ABC123"
+    },
+    "deleteReservation": {
+      "apid": 123,
+      "rcode": "ABC123"
+    },
+    "getPayments": {
+      "apid": 123,
+      "rcode": "ABC123"
+    },
+    "getOnlineCheckin": {
+      "apid": 123,
+      "rcode": "ABC123"
+    },
+    "addGuest": {
+      "apid": 123,
+      "rcode": "ABC123",
+      "nationality": "PRT",
+      "birthday": "1990-01-01",
+      "doc_id": "EXAMPLE123",
+      "doc_type": "P",
+      "doc_country": "PRT",
+      "arrival": "2026-10-10",
+      "departure": "2026-10-12",
+      "country_residence": "PRT",
+      "city_residence": "Lisboa",
+      "name": "Example Person"
+    },
+    "removeGuest": {
+      "apid": 123,
+      "rcode": "ABC123",
+      "name": "Example Person"
+    },
+    "removeAllGuests": {
+      "apid": 123,
+      "rcode": "ABC123"
+    },
+    "addReservationExtra": {
+      "apid": 123,
+      "rcode": "ABC123",
+      "extra_id": "EXTRA1",
+      "extra_name": "Example extra",
+      "extra_vat": 23,
+      "extra_type": "S",
+      "extra_total": "10.00"
+    },
+    "deleteReservationExtras": {
+      "apid": 123,
+      "rcode": "ABC123"
+    },
+    "getReservationExtras": {
+      "apid": 123,
+      "rcode": "ABC123"
+    },
+    "getKeycode": {
+      "apid": 123,
+      "rcode": "ABC123",
+      "provider": "nuki"
+    },
+    "getLastSIBADate": {
+      "apid": 123
+    },
+    "validateSIBA": {
+      "apid": 123,
+      "rcode": "ABC123"
+    },
+    "sendSIBA": {
+      "apid": 123,
+      "rcode": "ABC123"
+    },
+    "getExpenses": {
+      "apid": 123,
+      "date_start": 1790812800,
+      "date_end": 1793491199
+    },
+    "addExpense": {
+      "apid": 123,
+      "category": 20,
+      "document": "invoice",
+      "type": "variable",
+      "vendor": "Example Vendor",
+      "number": "FT EXAMPLE",
+      "date": "2026-10-01",
+      "active": true,
+      "lines": [
+        {
+          "description": "Example repair",
+          "amount": "100.00",
+          "vat_rate": "23.00"
+        }
+      ]
+    },
+    "addExpenseLine": {
+      "apid": 123,
+      "id": 1,
+      "description": "Example repair",
+      "amount": "100.00",
+      "vat_rate": "23.00"
+    },
+    "deleteExpense": {
+      "apid": 123,
+      "id": 1
+    },
+    "disableExpense": {
+      "apid": 123,
+      "id": 1
+    },
+    "getExpenseCategories": {
+      "apid": 123
+    },
+    "getInvoices": {
+      "invoicing_nif": "123456789"
+    },
+    "updateInvoicingConfig": {
+      "invoicing_nif": "123456789",
+      "inv_send_email": false
+    },
+    "getSeries": {
+      "invoicing_nif": "123456789"
+    },
+    "addSeries": {
+      "invoicing_nif": "123456789",
+      "series": "EXAMPLE",
+      "invoice_type": "FR"
+    },
+    "disableSeries": {
+      "invoicing_nif": "123456789",
+      "series": "EXAMPLE",
+      "invoice_type": "FR"
+    },
+    "getProducts": {
+      "invoicing_nif": "123456789"
+    },
+    "addProduct": {
+      "invoicing_nif": "123456789",
+      "product_id": "EXAMPLE1",
+      "description": "Example repair",
+      "price": "10.00",
+      "vat": "23"
+    },
+    "deleteProduct": {
+      "invoicing_nif": "123456789",
+      "product_id": "EXAMPLE1"
+    },
+    "getReceipts": {
+      "invoicing_nif": "123456789"
+    },
+    "getCreditNotes": {
+      "invoicing_nif": "123456789"
+    },
+    "addInvoice": {
+      "invoicing_nif": "123456789",
+      "customer_id": "",
+      "name": "Example Person",
+      "country": "PRT",
+      "lines": [
+        {
+          "product_id": "EXAMPLE1",
+          "custom_descr": "Example service",
+          "qty": "1",
+          "price": "10.00",
+          "discount": "0",
+          "vat": "23",
+          "reason_code": ""
+        }
+      ]
+    },
+    "addInvoiceLine": {
+      "invoicing_nif": "123456789",
+      "id": 1,
+      "product_id": "EXAMPLE1",
+      "custom_descr": "Example service",
+      "qty": "1",
+      "price": "10.00",
+      "discount": "0",
+      "vat": "23",
+      "reason_code": ""
+    },
+    "addInvoiceLines": {
+      "invoicing_nif": "123456789",
+      "id": 1,
+      "lines": [
+        {
+          "product_id": "EXAMPLE1",
+          "custom_descr": "Example service",
+          "qty": "1",
+          "price": "10.00",
+          "discount": "0",
+          "vat": "23",
+          "reason_code": ""
+        }
+      ]
+    },
+    "closeInvoice": {
+      "invoicing_nif": "123456789",
+      "id": 1
+    },
+    "deleteInvoice": {
+      "invoicing_nif": "123456789",
+      "id": 1
+    },
+    "addReceipt": {
+      "invoicing_nif": "123456789",
+      "refseries": "EXAMPLE",
+      "refid": 1
+    },
+    "addCreditNote": {
+      "invoicing_nif": "123456789",
+      "refseries": "EXAMPLE",
+      "refid": 1
+    },
+    "generateSAFT": {
+      "invoicing_nif": "123456789",
+      "year": 2026,
+      "month": 10
+    },
+    "getSAFT": {
+      "invoicing_nif": "123456789",
+      "year": 2026,
+      "month": 10
+    },
+    "generateModelo30": {
+      "invoicing_nif": "123456789",
+      "year": 2026,
+      "month": 10
+    },
+    "getModelo30": {
+      "invoicing_nif": "123456789",
+      "year": 2026,
+      "month": 10
+    },
+    "getRentalContracts": {
+      "apid": 123
+    },
+    "addRentalContract": {
+      "apid": 123,
+      "artigo": "123",
+      "contract_type": "ARREND",
+      "purpose": "H_PERM",
+      "start_date": "2026-10-01",
+      "rent": "500.00",
+      "tenants": [
+        {
+          "name": "Example Tenant",
+          "country": "PRT"
+        }
+      ]
+    },
+    "getCityTaxDeclarations": {
+      "apid": 123
+    },
+    "getUsers": {},
+    "addUser": {
+      "email": "service@example.invalid",
+      "name": "Example Person",
+      "property_ids": [
+        123
+      ]
+    },
+    "updateUser": {
+      "email": "service@example.invalid",
+      "name": "Example Person"
+    }
+  }
+}

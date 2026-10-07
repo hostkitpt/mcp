@@ -1,0 +1,17 @@
+{
+  "name": "hostkit-mcp-v2",
+  "version": "0.1.0",
+  "description": "MCP client for the Hostkit API v2 with mandatory HMAC",
+  "type": "module",
+  "bin": {
+    "hostkit-mcp-v2": "./src/server-v2.mjs"
+  },
+  "files": ["src", "README.md", "LICENSE"],
+  "scripts": {
+    "start": "node src/server-v2.mjs",
+    "check": "node --check src/server-v2.mjs && node --check src/client-v2.mjs",
+    "prepack": "npm run check"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}
