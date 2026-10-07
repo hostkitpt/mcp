@@ -4118,21 +4118,16 @@
     "getCityTaxDeclarations": {
       "name": "getCityTaxDeclarations",
       "method": "GET",
-      "scope": "property",
+      "scope": "account",
       "permission": "read",
       "schema": {
         "type": "object",
         "properties": {
-          "apid": {
-            "type": "integer",
-            "description": "Property ID belonging to the authenticated account.",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "id": {
+          "license_number": {
             "type": "string",
-            "description": "Source-qualified opaque declaration identity, not a numeric database ID.",
-            "pattern": "^(tmtai|itaxas):[A-Za-z0-9_-][A-Za-z0-9_.-]{0,127}$"
+            "description": "One numeric registration number; matches a single declaration or an exact member of a merged declaration.",
+            "pattern": "^[0-9]+$",
+            "maxLength": 128
           },
           "uniqid": {
             "type": "string",
@@ -4175,20 +4170,18 @@
             "maximum": 2147483647
           }
         },
-        "required": [
-          "apid"
-        ],
+        "required": [],
         "additionalProperties": false
       },
-      "description": "Read city-tax declarations with their local PDF in document as base64 JSON, or null when no local PDF is available.",
+      "description": "Read account city-tax declarations with their local PDF in document as base64 JSON, or null when no local PDF is available.",
       "group": "tmt",
       "businessRules": [
-        "Search both declaration sources automatically; source is a response field, not a request filter. uniqid searches both sources; use the returned source-qualified id to select one unambiguously. Month and quarter are mutually exclusive and require year. Conflicting declaration identities must be rejected.",
+        "Search both declaration sources for the authenticated account, including historical declarations. No apid or id is accepted or returned. source is a response field, not a request filter; uniqid searches both sources and remains the declaration identifier. All supplied filters intersect. Month and quarter are mutually exclusive and require year.",
         "Validate source-specific periods and states. iTaxas keeps its stored numeric month when historical periodicity is unknown.",
-        "Grouped declarations appear once and must include the requested property. Never expose municipal credentials or internal error text.",
+        "license_number matches one complete registration or an exact member of a comma-separated merged group, never a substring. Each stored merged declaration is returned as one object with the full codigo_al list; number, multibanco and document belong to the whole group. Payment amounts are not split between registrations. Never expose municipal credentials or internal error text.",
         "Returns declarations, limit, offset and has_more. Each declaration contains document: {content_base64, content_type, filename} for an available local TMTAI PDF, otherwise null.",
-        "document_available is distinct from document_supported. Remote iTaxas documents are not fetched and token URLs are never returned. Invalid local PDF content returns invalid_document. Local files are bounded at 50 MiB; delivery additionally requires the page to fit 60 MiB of encoded document JSON, below the 64 MiB HTTP ceiling. An oversized page, including an individual PDF too large after Base64 encoding, returns HTTP 413 response_too_large. Use an identity or a smaller limit for multi-document pages.",
-        "A source-qualified identity lookup rejects duplicate identities and returns not_found when no declaration matches.",
+        "document_available is distinct from document_supported. Remote iTaxas documents are not fetched and token URLs are never returned. Invalid local PDF content returns invalid_document. Local files are bounded at 50 MiB; delivery additionally requires the page to fit 60 MiB of encoded document JSON, below the 64 MiB HTTP ceiling. An oversized page, including an individual PDF too large after Base64 encoding, returns HTTP 413 response_too_large. Filter by uniqid or use a smaller limit for multi-document pages.",
+        "Results always remain a paginated declarations array, including with uniqid. No matches return an empty array, not a not_found error. If a uniqid occurs in both sources, both account-owned records are returned.",
         "Each declaration includes its saved number and multibanco: {entity, reference, amount}, or null when payment data is missing or malformed. Both declaration sources are supported. Entity and reference are strings preserving leading zeros; amount is a nonnegative decimal string with two decimal places and a dot separator."
       ],
       "responseSchema": {
@@ -4199,11 +4192,6 @@
             "items": {
               "type": "object",
               "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "Source-qualified opaque declaration identity, not a numeric database ID.",
-                  "pattern": "^(tmtai|itaxas):[A-Za-z0-9_-][A-Za-z0-9_.-]{0,127}$"
-                },
                 "source": {
                   "type": "string",
                   "description": "Declaration source; part of its identity.",
@@ -4220,7 +4208,7 @@
                 },
                 "codigo_al": {
                   "type": "string",
-                  "description": "Saved property registration(s)."
+                  "description": "Full saved registration number or comma-separated merged group."
                 },
                 "rn_type": {
                   "type": "string",
@@ -4249,7 +4237,7 @@
                     },
                     "amount": {
                       "type": "string",
-                      "description": "Amount payable, with two decimal places and a dot separator.",
+                      "description": "Amount payable for the whole declaration, with two decimal places and a dot separator.",
                       "pattern": "^[0-9]+\\.[0-9]{2}$"
                     }
                   },
@@ -4259,7 +4247,8 @@
                     "amount"
                   ],
                   "additionalProperties": false,
-                  "nullable": true
+                  "nullable": true,
+                  "description": "Payment data for the whole declaration, or null when missing or malformed."
                 },
                 "submitted_at": {
                   "type": "string",
@@ -4341,7 +4330,6 @@
                 }
               },
               "required": [
-                "id",
                 "source",
                 "uniqid",
                 "codigo_al",
@@ -5085,9 +5073,7 @@
       "apid": 123,
       "id": 1
     },
-    "getCityTaxDeclarations": {
-      "apid": 123
-    },
+    "getCityTaxDeclarations": {},
     "getUsers": {},
     "addUser": {
       "email": "service@example.invalid",
