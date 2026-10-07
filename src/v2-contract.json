@@ -2228,7 +2228,7 @@
         "Both the original and reconstructed file must fit within 5 MiB. Unsafe files are rejected; timeouts, service failures or incomplete security results reject the upload without storing the original or replacing the existing attachment.",
         "No filename or content_type request parameter is accepted. Store privately under a server-generated name, without execution permissions. Replace the existing attachment only after successful processing.",
         "Uploading an attachment does not parse QR codes, change expense lines/totals, or fetch a client URL.",
-        "Expense uploads share a validation-service rate limit of 1 call per second across all clients. There is no waiting queue or automatic retry. When the validation service returns HTTP 429, the API responds with HTTP 503, code validation_unavailable and message \"Expense uploads have a rate limit of 1 per second\"; no file is saved and the existing attachment remains unchanged."
+        "Expense uploads share a validation-service rate limit of 1 call per second across all clients. Excess calls are queued for execution by the validation service rather than rejected immediately; sustained over-subscription increases latency. Hostkit adds no local waiting queue or automatic retry; validation requests have a 60-second timeout, including any provider-side waiting. When the validation service returns HTTP 429, the API responds with HTTP 503, code validation_unavailable and message \"Expense uploads have a rate limit of 1 per second\". Timeouts retain the generic validation-unavailable message. Failed uploads save no file and leave the existing attachment unchanged."
       ],
       "responseSchema": {
         "type": "object",
