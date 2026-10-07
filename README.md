@@ -1,27 +1,50 @@
-# Hostkit Local MCP
+# Hostkit API v2 MCP
 
-Local MCP client for the Hostkit API. 
+Local MCP client for the Hostkit API v2, with automatic HMAC signing.
 
-- Full documentation: https://docs.hostkit.pt
-- LLMs index: https://docs.hostkit.pt/llms.txt
+- [API documentation](https://docs.hostkit.pt/)
+- [LLMs index](https://docs.hostkit.pt/llms.txt)
 
-## API v2
+## Installation
 
-Requires Node.js 20 or newer. Configure `HOSTKIT_API_V2_KEY` and `HOSTKIT_API_V2_SECRET` locally, then run:
+Create an API key and its HMAC secret in Hostkit **My Account**, then configure your MCP client:
+
+```json
+{
+  "mcpServers": {
+    "hostkit": {
+      "command": "npx",
+      "args": ["-y", "github:hostkitpt/mcp"],
+      "env": {
+        "HOSTKIT_API_V2_KEY": "YOUR_API_KEY",
+        "HOSTKIT_API_V2_SECRET": "YOUR_HMAC_SECRET"
+      }
+    }
+  }
+}
+```
+
+The command is:
+
+```sh
+npx -y github:hostkitpt/mcp
+```
+
+The explicit executable remains available:
 
 ```sh
 npx -y --package=github:hostkitpt/mcp hostkit-mcp-v2
 ```
 
-The client signs requests automatically with HMAC. Never share credentials or put them in prompts. Review fiscal and destructive operations before invoking them.
+Both commands start the same API v2 client. This repository supports API v2 only.
 
-## Legacy Compatibility
+## Security
 
-The existing `hostkit-mcp` binary and v1 source remain available for existing installations. API v1 is deprecated; use v2 for new integrations.
+Store credentials locally. Never share them in prompts, exported collections or source control.
 
-## Development
+Each request is signed automatically. Account [IP whitelist](https://docs.hostkit.pt/ip-whitelisting) rules also apply to MCP requests.
 
-The API v2 client is in `v2/`. Run `npm run check` from that directory. The root check/start commands remain compatible with the existing v1 client.
+Review write, destructive and fiscal operations before invoking them. The client does not retry writes automatically; confirm uncertain results before retrying because repeated writes can create duplicates.
 
 ## Disclaimer
 

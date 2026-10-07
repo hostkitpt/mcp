@@ -1,39 +1,21 @@
 {
   "name": "hostkit-mcp",
-  "version": "0.2.0",
-  "description": "Hostkit API MCP clients with API v2 HMAC support",
+  "version": "0.3.0",
+  "description": "MCP client for the Hostkit API v2 with mandatory HMAC",
   "homepage": "https://github.com/hostkitpt/mcp",
   "type": "module",
   "bin": {
-    "hostkit-mcp": "./src/server.mjs",
-    "hostkit-mcp-v2": "./v2/src/server-v2.mjs"
+    "hostkit-mcp-v2": "./src/server-v2.mjs"
   },
-  "files": [
-    "src",
-    "README.md",
-    "LICENSE",
-    "v2"
-  ],
+  "files": ["src", "README.md", "LICENSE"],
   "scripts": {
-    "start": "node src/server.mjs",
-    "check": "node --check src/server.mjs",
+    "start": "node src/server-v2.mjs",
+    "check": "node --check src/server-v2.mjs && node --check src/client-v2.mjs",
     "prepack": "npm run check"
   },
-  "engines": {
-    "node": ">=20"
-  },
-  "keywords": [
-    "hostkit",
-    "mcp",
-    "model-context-protocol"
-  ],
+  "engines": { "node": ">=20" },
+  "keywords": ["hostkit", "mcp", "model-context-protocol"],
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hostkitpt/mcp.git"
-  },
-  "funding": {
-    "type": "documentation",
-    "url": "https://docs.hostkit.pt/"
-  }
+  "repository": { "type": "git", "url": "git+https://github.com/hostkitpt/mcp.git" },
+  "funding": { "type": "documentation", "url": "https://docs.hostkit.pt/" }
 }
