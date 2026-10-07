@@ -4188,7 +4188,8 @@
         "Grouped declarations appear once and must include the requested property. Never expose municipal credentials or internal error text.",
         "Returns declarations, limit, offset and has_more. Each declaration contains document: {content_base64, content_type, filename} for an available local TMTAI PDF, otherwise null.",
         "document_available is distinct from document_supported. Remote iTaxas documents are not fetched and token URLs are never returned. Invalid local PDF content returns invalid_document. Local files are bounded at 50 MiB; delivery additionally requires the page to fit 60 MiB of encoded document JSON, below the 64 MiB HTTP ceiling. An oversized page, including an individual PDF too large after Base64 encoding, returns HTTP 413 response_too_large. Use an identity or a smaller limit for multi-document pages.",
-        "A source-qualified identity lookup rejects duplicate identities and returns not_found when no declaration matches."
+        "A source-qualified identity lookup rejects duplicate identities and returns not_found when no declaration matches.",
+        "Each declaration includes its saved number and multibanco: {entity, reference, amount}, or null when payment data is missing or malformed. Both declaration sources are supported. Entity and reference are strings preserving leading zeros; amount is a nonnegative decimal string with two decimal places and a dot separator."
       ],
       "responseSchema": {
         "type": "object",
@@ -4231,7 +4232,34 @@
                 },
                 "number": {
                   "type": "string",
-                  "description": "Saved declaration number."
+                  "description": "Saved declaration number; empty when not yet assigned."
+                },
+                "multibanco": {
+                  "type": "object",
+                  "properties": {
+                    "entity": {
+                      "type": "string",
+                      "description": "Multibanco entity, preserving leading zeros.",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "reference": {
+                      "type": "string",
+                      "description": "Multibanco reference, preserving leading zeros.",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "amount": {
+                      "type": "string",
+                      "description": "Amount payable, with two decimal places and a dot separator.",
+                      "pattern": "^[0-9]+\\.[0-9]{2}$"
+                    }
+                  },
+                  "required": [
+                    "entity",
+                    "reference",
+                    "amount"
+                  ],
+                  "additionalProperties": false,
+                  "nullable": true
                 },
                 "submitted_at": {
                   "type": "string",
@@ -4320,6 +4348,7 @@
                 "rn_type",
                 "municipality",
                 "number",
+                "multibanco",
                 "submitted_at",
                 "period",
                 "document_available",
