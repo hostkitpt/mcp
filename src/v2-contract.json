@@ -2227,7 +2227,8 @@
         "PDF, JPG, JPEG and PNG files are sent to an external security service for Content Disarm and Reconstruction (CDR). Only the approved, reconstructed PDF/A is stored; images are accepted but the stored content type is always application/pdf.",
         "Both the original and reconstructed file must fit within 5 MiB. Unsafe files are rejected; timeouts, service failures or incomplete security results reject the upload without storing the original or replacing the existing attachment.",
         "No filename or content_type request parameter is accepted. Store privately under a server-generated name, without execution permissions. Replace the existing attachment only after successful processing.",
-        "Uploading an attachment does not parse QR codes, change expense lines/totals, or fetch a client URL."
+        "Uploading an attachment does not parse QR codes, change expense lines/totals, or fetch a client URL.",
+        "Expense uploads share a validation-service rate limit of 1 call per second across all clients. There is no waiting queue or automatic retry. When the validation service returns HTTP 429, the API responds with HTTP 503, code validation_unavailable and message \"Expense uploads have a rate limit of 1 per second\"; no file is saved and the existing attachment remains unchanged."
       ],
       "responseSchema": {
         "type": "object",
