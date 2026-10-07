@@ -1,6 +1,9 @@
-# Hostkit MCP
+# Hostkit Local MCP
 
-Local MCP clients for the Hostkit API. Full documentation: [Hostkit MCP v2](https://docs.hostkit.pt/mcp).
+Local MCP client for the Hostkit API. 
+
+Full documentation: https://docs.hostkit.pt/mcp
+LLMs index: https://docs.hostkit.pt/llms.txt
 
 ## API v2
 
