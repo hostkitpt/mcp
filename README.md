@@ -1,13 +1,13 @@
-# Hostkit API v2 MCP
+# Hostkit API v2 Local MCP
 
 Local MCP client for the Hostkit API v2, with automatic HMAC signing.
 
-- [API documentation](https://docs.hostkit.pt/)
-- [LLMs index](https://docs.hostkit.pt/llms.txt)
+- Full documentation: https://docs.hostkit.pt
+- LLMs index: https://docs.hostkit.pt/llms.txt
 
 ## Installation
 
-Create an API key and its HMAC secret in Hostkit **My Account**, then configure your MCP client:
+Create an API key and its HMAC secret in Hostkit -> **My Account**, then configure your MCP client:
 
 ```json
 {
