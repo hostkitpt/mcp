@@ -2204,16 +2204,9 @@
             "minimum": 1,
             "maximum": 9007199254740991
           },
-          "filename": {
-            "type": "string",
-            "description": "Original filename; PDF, JPG, JPEG or PNG only. No directory paths.",
-            "minLength": 1,
-            "maxLength": 128,
-            "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]*\\.(pdf|jpg|jpeg|png|PDF|JPG|JPEG|PNG)$"
-          },
           "content_base64": {
             "type": "string",
-            "description": "Canonical Base64 of the file bytes, without whitespace or a data URI.",
+            "description": "Canonical Base64 of PDF, JPG, JPEG or PNG bytes, without whitespace or a data URI. The file type is detected from its content; no filename is supplied.",
             "minLength": 4,
             "maxLength": 6990508
           }
@@ -2221,7 +2214,6 @@
         "required": [
           "apid",
           "id",
-          "filename",
           "content_base64"
         ],
         "additionalProperties": false
@@ -2231,10 +2223,10 @@
       "maxBodyBytes": 7340032,
       "businessRules": [
         "Maximum original file size is 5 MiB (5242880 bytes); the raw JSON ceiling is 7 MiB for this endpoint only. Other operations remain limited to 8192 bytes.",
-        "Verify expense/account/property ownership and the expenses module. Validate actual file content against its extension; unsupported or malformed documents are rejected.",
+        "Verify expense/account/property ownership and the expenses module. Detect the initial file type from its bytes, then require security validation; unsupported or malformed documents are rejected.",
         "PDF, JPG, JPEG and PNG files are sent to an external security service for Content Disarm and Reconstruction (CDR). Only the approved, reconstructed PDF/A is stored; images are accepted but the stored content type is always application/pdf.",
         "Both the original and reconstructed file must fit within 5 MiB. Unsafe files are rejected; timeouts, service failures or incomplete security results reject the upload without storing the original or replacing the existing attachment.",
-        "Store privately under a server-generated name, without execution permissions. Replace the existing attachment only after successful processing; original filenames never become filesystem paths.",
+        "No filename or content_type request parameter is accepted. Store privately under a server-generated name, without execution permissions. Replace the existing attachment only after successful processing.",
         "Uploading an attachment does not parse QR codes, change expense lines/totals, or fetch a client URL."
       ],
       "responseSchema": {
@@ -4910,7 +4902,6 @@
     "uploadExpenseFile": {
       "apid": 123,
       "id": 1,
-      "filename": "expense.pdf",
       "content_base64": "JVBERi0xLjQKJSBFeGFtcGxlIG9ubHkK"
     },
     "getInvoices": {
