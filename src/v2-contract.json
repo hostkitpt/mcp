@@ -4178,7 +4178,7 @@
       "businessRules": [
         "Search both declaration sources for the authenticated account, including historical declarations. No apid or id is accepted or returned. source is a response field, not a request filter; uniqid searches both sources and remains the declaration identifier. All supplied filters intersect. Month and quarter are mutually exclusive and require year.",
         "Validate source-specific periods and states. iTaxas keeps its stored numeric month when historical periodicity is unknown.",
-        "license_number matches one complete registration or an exact member of a comma-separated merged group, never a substring. Each stored merged declaration is returned as one object with the full codigo_al list; number, multibanco and document belong to the whole group. Payment amounts are not split between registrations. Never expose municipal credentials or internal error text.",
+        "license_number matches one complete registration or an exact member of a comma-separated merged group, never a substring. Each stored merged declaration is returned as one object with the full license_number list; number, multibanco and document belong to the whole group. Payment amounts are not split between registrations. Never expose municipal credentials or internal error text.",
         "Returns declarations, limit, offset and has_more. Each declaration contains document: {content_base64, content_type, filename} for an available local TMTAI PDF, otherwise null.",
         "document_available is distinct from document_supported. Remote iTaxas documents are not fetched and token URLs are never returned. Invalid local PDF content returns invalid_document. Local files are bounded at 50 MiB; delivery additionally requires the page to fit 60 MiB of encoded document JSON, below the 64 MiB HTTP ceiling. An oversized page, including an individual PDF too large after Base64 encoding, returns HTTP 413 response_too_large. Filter by uniqid or use a smaller limit for multi-document pages.",
         "Results always remain a paginated declarations array, including with uniqid. No matches return an empty array, not a not_found error. If a uniqid occurs in both sources, both account-owned records are returned.",
@@ -4206,7 +4206,7 @@
                   "pattern": "^[A-Za-z0-9._-]+$",
                   "maxLength": 128
                 },
-                "codigo_al": {
+                "license_number": {
                   "type": "string",
                   "description": "Full saved registration number or comma-separated merged group."
                 },
@@ -4332,7 +4332,7 @@
               "required": [
                 "source",
                 "uniqid",
-                "codigo_al",
+                "license_number",
                 "rn_type",
                 "municipality",
                 "number",
