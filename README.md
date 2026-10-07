@@ -19,3 +19,7 @@ The existing `hostkit-mcp` binary and v1 source remain available for existing in
 ## Development
 
 The API v2 client is in `v2/`. Run `npm run check` from that directory. The root check/start commands remain compatible with the existing v1 client.
+
+## Disclaimer
+
+Hostkit is not responsible for API misuse, incorrect implementations or unintended actions caused by third-party code.
