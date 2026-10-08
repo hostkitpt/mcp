@@ -2051,7 +2051,7 @@
               ],
               "additionalProperties": false
             },
-            "description": "Atomic expense lines; the entire signed JSON body must fit 8192 bytes."
+            "description": "Required atomic expense lines; the entire signed JSON body must fit 8192 bytes."
           }
         },
         "required": [
@@ -2061,66 +2061,18 @@
           "type",
           "vendor",
           "number",
-          "date"
+          "date",
+          "lines"
         ],
         "additionalProperties": false
       },
       "legacy": "addExpense",
-      "description": "Create an expense, optionally with atomic lines; without lines the header has zero totals.",
+      "description": "Create an expense with one or more lines in a single atomic request.",
       "group": "expenses",
       "businessRules": [
         "document=cnote requires type=variable. Nonzero pmc requires the PMC addon. Requires an active property with the expenses module.",
-        "Optional lines are committed atomically with the header, require transactional InnoDB tables, and are bounded at 20 within the 8192-byte body limit."
+        "lines is required and contains 1 to 20 lines within the 8192-byte body limit. The header and all lines are committed together; any line failure rolls back the complete creation."
       ]
-    },
-    "addExpenseLine": {
-      "name": "addExpenseLine",
-      "method": "POST",
-      "scope": "property",
-      "permission": "write",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "apid": {
-            "type": "integer",
-            "description": "Property ID belonging to the authenticated account.",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "id": {
-            "type": "integer",
-            "description": "Numeric resource/document identity.",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "description": {
-            "type": "string",
-            "description": "Line description.",
-            "maxLength": 255
-          },
-          "amount": {
-            "type": "string",
-            "description": "Nonnegative amount, at most two decimal places.",
-            "pattern": "^[0-9]{1,10}(\\.[0-9]{1,2})?$"
-          },
-          "vat_rate": {
-            "type": "string",
-            "description": "VAT percentage 0 to 100, at most two decimal places.",
-            "pattern": "^([0-9]{1,2}(\\.[0-9]{1,2})?|100(\\.0{1,2})?)$"
-          }
-        },
-        "required": [
-          "apid",
-          "id",
-          "description",
-          "amount",
-          "vat_rate"
-        ],
-        "additionalProperties": false
-      },
-      "legacy": "addExpenseLine",
-      "description": "Add one expense line and recalculate totals.",
-      "group": "expenses"
     },
     "deleteExpense": {
       "name": "deleteExpense",
@@ -3054,243 +3006,24 @@
               ],
               "additionalProperties": false
             },
-            "description": "Atomic invoice lines; the entire signed JSON body must fit 8192 bytes."
+            "description": "Required atomic invoice lines; the entire signed JSON body must fit 8192 bytes."
           }
         },
         "required": [
           "invoicing_nif",
           "customer_id",
           "name",
-          "country"
-        ],
-        "additionalProperties": false
-      },
-      "legacy": "addInvoice",
-      "description": "Create an open fiscal invoice; rcode is optional. Add lines and close it explicitly.",
-      "group": "invoices",
-      "businessRules": [
-        "When rcode is supplied, require apid and verify the reservation belongs to that property/account.",
-        "Validate authorized NIF/series. Optional lines are committed atomically with the draft, require transactional InnoDB tables, and are bounded at 20 within the 8192-byte body limit. Closing is always explicit."
-      ]
-    },
-    "addInvoiceLine": {
-      "name": "addInvoiceLine",
-      "method": "POST",
-      "scope": "account",
-      "permission": "write",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "invoicing_nif": {
-            "type": "string",
-            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
-            "pattern": "^[A-Za-z0-9._-]{1,64}$"
-          },
-          "series": {
-            "type": "string",
-            "description": "Document series; omission uses the configured default series."
-          },
-          "id": {
-            "type": "integer",
-            "description": "Numeric resource/document identity.",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "invoice_type": {
-            "type": "string",
-            "description": "Invoice type; default FR.",
-            "enum": [
-              "FR",
-              "FT"
-            ]
-          },
-          "product_id": {
-            "type": "string",
-            "description": "Product code.",
-            "pattern": "^[A-Za-z0-9._-]{1,64}$"
-          },
-          "custom_descr": {
-            "type": "string",
-            "description": "Line description."
-          },
-          "qty": {
-            "type": "string",
-            "description": "Quantity.",
-            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
-          },
-          "price": {
-            "type": "string",
-            "description": "Nonnegative unit price.",
-            "pattern": "^[0-9]+(\\.[0-9]+)?$"
-          },
-          "discount": {
-            "type": "string",
-            "description": "Line discount.",
-            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
-          },
-          "vat": {
-            "type": "string",
-            "description": "VAT percentage.",
-            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
-          },
-          "reason_code": {
-            "type": "string",
-            "description": "Exemption reason code, or empty string.",
-            "pattern": "^[A-Za-z0-9._-]*$"
-          },
-          "region": {
-            "type": "string",
-            "description": "Fiscal product region; default PT.",
-            "enum": [
-              "PT",
-              "PT-MA",
-              "PT-AC"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Product type; default S.",
-            "enum": [
-              "S",
-              "P",
-              "I"
-            ]
-          }
-        },
-        "required": [
-          "invoicing_nif",
-          "id",
-          "product_id",
-          "custom_descr",
-          "qty",
-          "price",
-          "discount",
-          "vat",
-          "reason_code"
-        ],
-        "additionalProperties": false
-      },
-      "legacy": "addInvoiceLine",
-      "description": "Add one line to an open invoice, creating a product if needed.",
-      "group": "invoices"
-    },
-    "addInvoiceLines": {
-      "name": "addInvoiceLines",
-      "method": "POST",
-      "scope": "account",
-      "permission": "write",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "invoicing_nif": {
-            "type": "string",
-            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
-            "pattern": "^[A-Za-z0-9._-]{1,64}$"
-          },
-          "series": {
-            "type": "string",
-            "description": "Document series; omission uses the configured default series."
-          },
-          "id": {
-            "type": "integer",
-            "description": "Numeric resource/document identity.",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "invoice_type": {
-            "type": "string",
-            "description": "Invoice type; default FR.",
-            "enum": [
-              "FR",
-              "FT"
-            ]
-          },
-          "lines": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 20,
-            "items": {
-              "type": "object",
-              "properties": {
-                "product_id": {
-                  "type": "string",
-                  "description": "Product code.",
-                  "pattern": "^[A-Za-z0-9._-]{1,64}$"
-                },
-                "custom_descr": {
-                  "type": "string",
-                  "description": "Line description."
-                },
-                "qty": {
-                  "type": "string",
-                  "description": "Quantity.",
-                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
-                },
-                "price": {
-                  "type": "string",
-                  "description": "Nonnegative unit price.",
-                  "pattern": "^[0-9]+(\\.[0-9]+)?$"
-                },
-                "discount": {
-                  "type": "string",
-                  "description": "Line discount.",
-                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
-                },
-                "vat": {
-                  "type": "string",
-                  "description": "VAT percentage.",
-                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
-                },
-                "reason_code": {
-                  "type": "string",
-                  "description": "Exemption reason code, or empty string.",
-                  "pattern": "^[A-Za-z0-9._-]*$"
-                },
-                "region": {
-                  "type": "string",
-                  "description": "Fiscal product region; default PT.",
-                  "enum": [
-                    "PT",
-                    "PT-MA",
-                    "PT-AC"
-                  ]
-                },
-                "type": {
-                  "type": "string",
-                  "description": "Product type; default S.",
-                  "enum": [
-                    "S",
-                    "P",
-                    "I"
-                  ]
-                }
-              },
-              "required": [
-                "product_id",
-                "custom_descr",
-                "qty",
-                "price",
-                "discount",
-                "vat",
-                "reason_code"
-              ],
-              "additionalProperties": false
-            },
-            "description": "Atomic invoice lines; the entire signed JSON body must fit 8192 bytes."
-          }
-        },
-        "required": [
-          "invoicing_nif",
-          "id",
+          "country",
           "lines"
         ],
         "additionalProperties": false
       },
-      "description": "Atomically add a bounded batch of lines to an open invoice; close it explicitly.",
+      "legacy": "addInvoice",
+      "description": "Create a draft fiscal invoice with one or more lines in a single atomic request; rcode is optional. Close it explicitly with closeInvoice.",
       "group": "invoices",
       "businessRules": [
-        "Validate authorized NIF/series and open invoice identity. Requires transactional InnoDB tables. No automatic invoice closing.",
-        "At most 20 lines; the entire signed JSON body must fit 8192 bytes."
+        "When rcode is supplied, require apid and verify the reservation belongs to that property/account.",
+        "Validate authorized NIF/series. lines is required and contains 1 to 20 lines within the 8192-byte body limit. The draft and all lines are committed together; any line failure rolls back the complete creation. Closing is always explicit."
       ]
     },
     "closeInvoice": {
@@ -3490,7 +3223,12 @@
       },
       "legacy": "generateSAFT",
       "description": "Generate a SAF-T file for an authorized fiscal account.",
-      "group": "invoices"
+      "group": "invoices",
+      "businessRules": [
+        "Generation and reading are serialized for each account, VAT ID and period. Concurrent requests return operation_in_progress.",
+        "Validate the complete export before replacing the previous document. Generation or validation failures preserve the previous export.",
+        "A generated export is limited to 40 MiB. Reconcile document_publication_pending or commit_uncertain outcomes before retrying; this period remains unavailable until recovery is completed."
+      ]
     },
     "getSAFT": {
       "name": "getSAFT",
@@ -3527,7 +3265,11 @@
       },
       "legacy": "getSAFT",
       "description": "Read an already generated SAF-T file as base64 content.",
-      "group": "invoices"
+      "group": "invoices",
+      "businessRules": [
+        "Read a complete document belonging to the authenticated account and fiscal period. Missing documents return document_not_found; exports above 40 MiB return document_too_large.",
+        "Concurrent generation or reading of the same fiscal period returns operation_in_progress. A pending recovery returns document_publication_pending instead of exposing a document with inconsistent generation metadata."
+      ]
     },
     "generateModelo30": {
       "name": "generateModelo30",
@@ -3820,7 +3562,8 @@
       "group": "contracts",
       "businessRules": [
         "Requires the rental-contract module and an ARRE property. parte_comum=true requires nonempty parte_arrendada.",
-        "Tenant arrays are bounded at 20 and the whole UTF-8 body at 8192 bytes. Validate actual calendar dates and countries."
+        "Tenant arrays are bounded at 20 and the whole UTF-8 body at 8192 bytes. Validate actual calendar dates and countries.",
+        "contract_ref is an opaque unique reference. Do not derive or infer its value from a contract count."
       ]
     },
     "updateRentalContract": {
@@ -4893,21 +4636,19 @@
       "vendor": "Example Vendor",
       "number": "FT EXAMPLE",
       "date": "2026-10-01",
-      "active": true,
       "lines": [
         {
           "description": "Example repair",
           "amount": "100.00",
           "vat_rate": "23.00"
+        },
+        {
+          "description": "Example materials",
+          "amount": "25.00",
+          "vat_rate": "23.00"
         }
-      ]
-    },
-    "addExpenseLine": {
-      "apid": 123,
-      "id": 1,
-      "description": "Example repair",
-      "amount": "100.00",
-      "vat_rate": "23.00"
+      ],
+      "active": true
     },
     "deleteExpense": {
       "apid": 123,
@@ -4976,29 +4717,12 @@
           "discount": "0",
           "vat": "23",
           "reason_code": ""
-        }
-      ]
-    },
-    "addInvoiceLine": {
-      "invoicing_nif": "123456789",
-      "id": 1,
-      "product_id": "EXAMPLE1",
-      "custom_descr": "Example service",
-      "qty": "1",
-      "price": "10.00",
-      "discount": "0",
-      "vat": "23",
-      "reason_code": ""
-    },
-    "addInvoiceLines": {
-      "invoicing_nif": "123456789",
-      "id": 1,
-      "lines": [
+        },
         {
-          "product_id": "EXAMPLE1",
-          "custom_descr": "Example service",
+          "product_id": "EXAMPLE2",
+          "custom_descr": "Example additional service",
           "qty": "1",
-          "price": "10.00",
+          "price": "5.00",
           "discount": "0",
           "vat": "23",
           "reason_code": ""
