@@ -52,6 +52,14 @@ Review write, destructive and fiscal operations before invoking them. The client
 
 Invoices remain drafts until explicitly finalized with `closeInvoice`. Separate line-creation tools are not available in API v2.
 
+## Invoicing
+
+Customer tools list, create and delete customers for an authorized invoicing VAT ID. Deletion is refused when a fiscal document, including a draft, references the customer.
+
+Current account tools return period transactions and opening/closing balances, and manage unlinked manual transactions only. Dates are Unix timestamps in seconds; amounts are decimal strings. Automatic and fiscal-document-linked transactions cannot be edited or deleted.
+
+`addModelo30Transaction` creates a one-period (`U`) or recurring (`R`) transaction. It does not generate or submit a declaration.
+
 ## Disclaimer
 
 Hostkit is not responsible for API misuse, incorrect implementations or unintended actions caused by third-party code.
