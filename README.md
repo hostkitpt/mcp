@@ -46,6 +46,12 @@ Each request is signed automatically. Account [IP whitelist](https://docs.hostki
 
 Review write, destructive and fiscal operations before invoking them. The client does not retry writes automatically; confirm uncertain results before retrying because repeated writes can create duplicates.
 
+## Creating Documents
+
+`addExpense` and `addInvoice` require a `lines` array with 1 to 20 lines. The document and all lines are created together; a line failure rolls back the complete creation. The signed JSON body must fit 8192 bytes.
+
+Invoices remain drafts until explicitly finalized with `closeInvoice`. Separate line-creation tools are not available in API v2.
+
 ## Disclaimer
 
 Hostkit is not responsible for API misuse, incorrect implementations or unintended actions caused by third-party code.
