@@ -2071,7 +2071,8 @@
       "group": "expenses",
       "businessRules": [
         "document=cnote requires type=variable. Nonzero pmc requires the PMC addon. Requires an active property with the expenses module.",
-        "lines is required and contains 1 to 20 lines within the 8192-byte body limit. The header and all lines are committed together; any line failure rolls back the complete creation."
+        "lines is required and contains 1 to 20 lines within the 8192-byte body limit. The header and all lines are committed together; any line failure rolls back the complete creation.",
+        "Vendor, document number and descriptions accept punctuation, including apostrophes, as text. Invalid control characters are rejected. Retained attachments and unresolved document deletions are never assigned to a new expense."
       ]
     },
     "deleteExpense": {
@@ -2102,8 +2103,11 @@
         "additionalProperties": false
       },
       "legacy": "deleteExpense",
-      "description": "Permanently delete an expense and its lines.",
-      "group": "expenses"
+      "description": "Permanently delete an expense, its lines and its locally stored attachment.",
+      "group": "expenses",
+      "businessRules": [
+        "A confirmed failure before commit restores the data and attachment. Uncertain commits or incomplete file cleanup return a reconciliation error; do not retry automatically. External document links are not downloaded or deleted."
+      ]
     },
     "disableExpense": {
       "name": "disableExpense",
