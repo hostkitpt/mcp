@@ -4971,7 +4971,7 @@
         "The registration and every member of a merged declaration must belong to the authenticated account, have active properties and the city-tax module enabled. Conflicting providers or group configurations are rejected. No apid, source selector or municipal credentials are accepted.",
         "The declared period must have ended. Calculations and configured grouping follow the application submission flow. Selecting a merged member submits the entire configured group, not a separate declaration.",
         "Existing declarations for the registration/group and period return HTTP 409 declaration_exists. Another account submission in progress returns operation_in_progress. Do not run a manual application submission concurrently with this operation.",
-        "Returns the saved uniqid, source, license_number, year, month and status. submitted means accepted for processing; municipal submission can still be pending, and it does not mean paid or settled. Poll getCityTaxDeclarations using uniqid for the current declaration state.",
+        "Returns the saved uniqid, license_number, year, month and status. submitted means accepted for processing; municipal submission can still be pending, and it does not mean paid or settled. Poll getCityTaxDeclarations using uniqid for the current declaration state.",
         "An uncertain external or persistence outcome returns HTTP 503 citytax_submission_uncertain. A later attempt is blocked with submission_reconciliation_required until the outcome is reconciled. Never automatically repeat a submission after a timeout or uncertain response."
       ],
       "responseSchema": {
@@ -4982,14 +4982,6 @@
             "description": "Opaque declaration identity from the selected source.",
             "pattern": "^[A-Za-z0-9._-]+$",
             "maxLength": 128
-          },
-          "source": {
-            "type": "string",
-            "description": "Declaration source; part of its identity.",
-            "enum": [
-              "tmtai",
-              "itaxas"
-            ]
           },
           "license_number": {
             "type": "string",
@@ -5015,7 +5007,6 @@
         },
         "required": [
           "uniqid",
-          "source",
           "license_number",
           "year",
           "month",
