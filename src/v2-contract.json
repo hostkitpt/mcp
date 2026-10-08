@@ -1054,7 +1054,7 @@
       "description": "Atomically move an active or archived reservation to cancellations; this is not deletion.",
       "group": "reservations",
       "businessRules": [
-        "Requires InnoDB tables properties, reservations, reservations_archived, reservations_cancelled, fac_invoices and fac_config. Lock the property/reservation and require one unambiguous source; failures roll back the move.",
+        "Cancellation is atomic across the reservation and associated invoicing data. Require one unambiguous reservation; failures roll back the move.",
         "If a closed related invoice and credit_note_on_cancel configuration require automatic fiscal cancellation, return HTTP 503 automatic_credit_note_unavailable before reservation or fiscal changes. Complete the separate fiscal workflow in the application. No automatic credit notes or external AT series registration are provided by this operation."
       ]
     },
@@ -1088,8 +1088,8 @@
       "description": "Atomically delete a reservation and related records permanently.",
       "group": "reservations",
       "businessRules": [
-        "Requires all affected reservation, related-data and channel-manager mapping tables to use InnoDB. Fail closed with HTTP 503 transactions_unavailable when transactional requirements are not met; partial deletion is not permitted.",
-        "Lock the property/reservation and require one unambiguous active or archived source before deleting related records."
+        "Deletion is atomic across the reservation, related data and channel-manager mappings. Fail closed with HTTP 503 transactions_unavailable when atomic changes are unavailable; partial deletion is not permitted.",
+        "Require one unambiguous active or archived reservation before deleting related records."
       ]
     },
     "getPayments": {
@@ -3376,6 +3376,818 @@
         "Verify account/NIF ownership before file access. No public download token URLs or AT credentials are exposed. Missing XML returns document_not_found."
       ]
     },
+    "addModelo30Transaction": {
+      "name": "addModelo30Transaction",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,20}$"
+          },
+          "year": {
+            "type": "integer",
+            "description": "Calendar year.",
+            "minimum": 1000,
+            "maximum": 9999
+          },
+          "month": {
+            "type": "integer",
+            "description": "Calendar month.",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "beneficiary_nif": {
+            "type": "string",
+            "description": "Portuguese beneficiary VAT ID.",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "foreign_nif": {
+            "type": "string",
+            "description": "Foreign beneficiary VAT ID.",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "country": {
+            "type": "string",
+            "description": "Official numeric country code used by Modelo 30, not an ISO/ICAO letter code.",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "income_type": {
+            "type": "string",
+            "description": "Existing two-character Modelo 30 income code.",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "taxation": {
+            "type": "string",
+            "description": "Existing two-character Modelo 30 taxation code.",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "amount": {
+            "type": "string",
+            "description": "Nonnegative amount with a dot separator and at most two decimal places; maximum 999999999999.99.",
+            "pattern": "^[0-9]{1,12}(\\.[0-9]{1,2})?$"
+          },
+          "type": {
+            "type": "string",
+            "description": "U applies to one month; R applies to every generated month.",
+            "enum": [
+              "U",
+              "R"
+            ]
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "beneficiary_nif",
+          "foreign_nif",
+          "country",
+          "income_type",
+          "taxation",
+          "amount",
+          "type"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "type",
+              "year",
+              "month"
+            ],
+            "properties": {
+              "type": {
+                "enum": [
+                  "U"
+                ]
+              }
+            }
+          },
+          {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "enum": [
+                  "R"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "description": "Add a manual monthly or recurring Modelo 30 transaction.",
+      "group": "modelo30",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "unique_id": {
+            "type": "string",
+            "description": "Server-generated transaction ID; keep it as a string."
+          },
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,64}$"
+          },
+          "type": {
+            "type": "string",
+            "description": "Transaction frequency.",
+            "enum": [
+              "U",
+              "R"
+            ]
+          },
+          "year": {
+            "type": "integer",
+            "description": "Calendar year.",
+            "minimum": 1000,
+            "maximum": 9999,
+            "nullable": true
+          },
+          "month": {
+            "type": "integer",
+            "description": "Calendar month.",
+            "minimum": 1,
+            "maximum": 12,
+            "nullable": true
+          }
+        },
+        "required": [
+          "unique_id",
+          "invoicing_nif",
+          "type",
+          "year",
+          "month"
+        ],
+        "additionalProperties": false
+      },
+      "businessRules": [
+        "U requires year and month. R omits both and applies to all generated periods, including historical regeneration; response year/month are null.",
+        "Validate beneficiary identifiers, country, income and taxation codes. Amount is a nonnegative decimal string, including zero.",
+        "The transaction does not refresh an existing XML or submit a declaration. Use generateModelo30 explicitly after adding transactions.",
+        "Creation and generation are serialized per account and invoicing_nif. Repeating a successful creation with a fresh nonce creates another transaction."
+      ]
+    },
+    "getCustomers": {
+      "name": "getCustomers",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,20}$"
+          },
+          "customer_id": {
+            "type": "string",
+            "description": "Exact customer identity.",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "nif": {
+            "type": "string",
+            "description": "Exact customer VAT ID.",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "search": {
+            "type": "string",
+            "description": "Literal text search across customer contact fields.",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Result limit; default 25.",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Result offset; default 0.",
+            "minimum": 0,
+            "maximum": 2147483647
+          }
+        },
+        "required": [
+          "invoicing_nif"
+        ],
+        "additionalProperties": false
+      },
+      "description": "List customers or filter by customer_id, nif or search text.",
+      "group": "customers",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "customers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "customer_id": {
+                  "type": "string",
+                  "description": "Saved customer identity."
+                },
+                "nif": {
+                  "type": "string",
+                  "description": "Saved VAT ID."
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name."
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Address."
+                },
+                "city": {
+                  "type": "string",
+                  "description": "City."
+                },
+                "cp": {
+                  "type": "string",
+                  "description": "Postal code."
+                },
+                "country": {
+                  "type": "string",
+                  "description": "Country code."
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Email."
+                },
+                "phone": {
+                  "type": "string",
+                  "description": "Phone."
+                },
+                "favourite": {
+                  "type": "boolean",
+                  "description": "Favourite customer."
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Result limit; default 25.",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Result offset; default 0.",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "More results are available."
+          }
+        },
+        "required": [
+          "customers",
+          "limit",
+          "offset",
+          "has_more"
+        ],
+        "additionalProperties": false
+      },
+      "businessRules": [
+        "All supplied filters intersect. Results always remain a paginated customers array, including an exact ID lookup. Anonymous final-consumer profiles are excluded.",
+        "Customer identity and VAT ID are distinct for historical customers; return both without assuming they are equal."
+      ]
+    },
+    "addCustomer": {
+      "name": "addCustomer",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,20}$"
+          },
+          "nif": {
+            "type": "string",
+            "description": "Customer VAT ID; the customer_id is derived from this value.",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "name": {
+            "type": "string",
+            "description": "Customer name.",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "country": {
+            "type": "string",
+            "description": "Two-letter ISO country code.",
+            "pattern": "^[A-Za-z]{2}$"
+          },
+          "address": {
+            "type": "string",
+            "description": "Customer address; default -.",
+            "maxLength": 2000
+          },
+          "city": {
+            "type": "string",
+            "description": "Customer city; default -.",
+            "maxLength": 50
+          },
+          "cp": {
+            "type": "string",
+            "description": "Postal code; default 0000-000.",
+            "maxLength": 10
+          },
+          "email": {
+            "type": "string",
+            "description": "Optional email, or empty.",
+            "maxLength": 100,
+            "pattern": "^([^\\s@]+@[^\\s@]+\\.[^\\s@]+)?$"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Optional phone, or empty.",
+            "maxLength": 50,
+            "pattern": "^[0-9+() .-]*$"
+          },
+          "favourite": {
+            "type": "boolean",
+            "description": "Favourite customer; default false."
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "nif",
+          "name",
+          "country"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Create a customer for an authorized invoicing VAT ID.",
+      "group": "customers",
+      "businessRules": [
+        "Derive customer_id from the normalized customer VAT ID, as in customer creation in the application. An existing customer identity returns 409 customer_exists; this is not an update.",
+        "Anonymous final-consumer profiles cannot be created with this endpoint. Validate customer country and contact fields before saving."
+      ]
+    },
+    "deleteCustomer": {
+      "name": "deleteCustomer",
+      "method": "DELETE",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,20}$"
+          },
+          "customer_id": {
+            "type": "string",
+            "description": "Exact customer identity.",
+            "minLength": 1,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "customer_id"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Delete a customer only when no invoice, credit note or receipt references it.",
+      "group": "customers",
+      "businessRules": [
+        "Any associated document, including a draft or credited invoice, blocks deletion with 409 customer_in_use. Check historical references by customer identity and VAT ID.",
+        "Anonymous final-consumer profiles and ambiguous customer identities cannot be deleted. Serialize customer deletion with API v2 invoice creation."
+      ]
+    },
+    "getCurrentAccount": {
+      "name": "getCurrentAccount",
+      "method": "GET",
+      "scope": "account",
+      "permission": "read",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,20}$"
+          },
+          "date_start": {
+            "type": "integer",
+            "description": "Inclusive start of the period in Unix seconds.",
+            "minimum": 0,
+            "maximum": 253402300799
+          },
+          "date_end": {
+            "type": "integer",
+            "description": "Inclusive end in Unix seconds, including every microsecond of that second.",
+            "minimum": 0,
+            "maximum": 253402300799
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Result limit; default 25.",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Result offset; default 0.",
+            "minimum": 0,
+            "maximum": 2147483647
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "date_start",
+          "date_end"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Read current-account transactions for a period, with opening and closing balances.",
+      "group": "current-account",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "transactions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "description": "Numeric resource/document identity.",
+                  "minimum": 1,
+                  "maximum": 9007199254740991
+                },
+                "date": {
+                  "type": "integer",
+                  "description": "Unix timestamp in seconds; transactions retain microsecond precision internally.",
+                  "minimum": 0,
+                  "maximum": 253402300799
+                },
+                "timestamp_microseconds": {
+                  "type": "string",
+                  "description": "Saved Unix microseconds; do not use it as the transaction ID."
+                },
+                "origin": {
+                  "type": "string",
+                  "description": "Saved transaction origin."
+                },
+                "type": {
+                  "type": "string",
+                  "description": "C credits the account; D debits it.",
+                  "enum": [
+                    "C",
+                    "D"
+                  ]
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description."
+                },
+                "amount": {
+                  "type": "string",
+                  "description": "Nonnegative amount with a dot separator and at most two decimal places; maximum 999999999999.99.",
+                  "pattern": "^[0-9]{1,12}(\\.[0-9]{1,2})?$"
+                },
+                "apid": {
+                  "type": "integer",
+                  "description": "Property ID belonging to the authenticated account.",
+                  "minimum": 1,
+                  "maximum": 9007199254740991,
+                  "nullable": true
+                },
+                "rcode": {
+                  "type": "string",
+                  "description": "Reservation code.",
+                  "nullable": true
+                },
+                "invoice_series": {
+                  "type": "string",
+                  "description": "Saved document reference, if available.",
+                  "nullable": true
+                },
+                "invoice_id": {
+                  "type": "string",
+                  "description": "Saved document number, if available.",
+                  "nullable": true
+                },
+                "category": {
+                  "type": "integer",
+                  "description": "Transaction category; default 1.",
+                  "minimum": 0,
+                  "maximum": 9,
+                  "nullable": true
+                },
+                "hide_sv": {
+                  "type": "boolean",
+                  "description": "Hidden from service users; false when unset."
+                },
+                "editable": {
+                  "type": "boolean",
+                  "description": "Only unlinked manual transactions are editable."
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "opening_balance": {
+            "type": "string",
+            "description": "Balance before the start; exact decimal string.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "closing_balance": {
+            "type": "string",
+            "description": "Balance through the end; exact decimal string.",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Result limit; default 25.",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Result offset; default 0.",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "More period transactions are available."
+          }
+        },
+        "required": [
+          "transactions",
+          "opening_balance",
+          "closing_balance",
+          "limit",
+          "offset",
+          "has_more"
+        ],
+        "additionalProperties": false
+      },
+      "businessRules": [
+        "Requires the current-account module to be enabled for invoicing_nif. date_start must not exceed date_end.",
+        "C adds amount to the balance; D subtracts it. Opening and closing balances cover the full account period, not only the returned page. No property filter changes the balance scope.",
+        "Transactions are ordered by date and stable id. Use limit/offset to retrieve all lines. Concurrent changes between requests can alter later pages; each response uses one consistent snapshot.",
+        "Amounts and balances are exact decimal strings. Malformed saved amounts or directions return invalid_stored_amount or invalid_stored_type rather than silently changing the balance."
+      ]
+    },
+    "addCurrentAccountTransaction": {
+      "name": "addCurrentAccountTransaction",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,20}$"
+          },
+          "type": {
+            "type": "string",
+            "description": "C credits the account; D debits it.",
+            "enum": [
+              "C",
+              "D"
+            ]
+          },
+          "amount": {
+            "type": "string",
+            "description": "Nonnegative amount with a dot separator and at most two decimal places; maximum 999999999999.99.",
+            "pattern": "^[0-9]{1,12}(\\.[0-9]{1,2})?$"
+          },
+          "date": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds; transactions retain microsecond precision internally.",
+            "minimum": 0,
+            "maximum": 253402300799
+          },
+          "description": {
+            "type": "string",
+            "description": "Transaction description; default empty.",
+            "maxLength": 2000
+          },
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Owned reservation code; requires apid. Empty clears the reservation link.",
+            "pattern": "^[A-Za-z0-9._-]{0,60}$"
+          },
+          "category": {
+            "type": "integer",
+            "description": "Transaction category; default 1.",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "hide_sv": {
+            "type": "boolean",
+            "description": "Hide from service users; default false."
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "type",
+          "amount",
+          "date"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Add a manual current-account transaction without a document reference.",
+      "group": "current-account",
+      "businessRules": [
+        "Requires the current-account module. The server fixes origin to manual; invoice references cannot be supplied.",
+        "Any supplied property and reservation must belong to the account. A reservation requires apid.",
+        "Amount is nonnegative; type determines credit or debit. Zero is accepted. Returns the stable id."
+      ]
+    },
+    "updateCurrentAccountTransaction": {
+      "name": "updateCurrentAccountTransaction",
+      "method": "PATCH",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,20}$"
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "type": {
+            "type": "string",
+            "description": "C credits the account; D debits it.",
+            "enum": [
+              "C",
+              "D"
+            ]
+          },
+          "amount": {
+            "type": "string",
+            "description": "Nonnegative amount with a dot separator and at most two decimal places; maximum 999999999999.99.",
+            "pattern": "^[0-9]{1,12}(\\.[0-9]{1,2})?$"
+          },
+          "date": {
+            "type": "integer",
+            "description": "Unix timestamp in seconds; transactions retain microsecond precision internally.",
+            "minimum": 0,
+            "maximum": 253402300799
+          },
+          "description": {
+            "type": "string",
+            "description": "Transaction description; default empty.",
+            "maxLength": 2000
+          },
+          "apid": {
+            "type": "integer",
+            "description": "Property ID belonging to the authenticated account.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "rcode": {
+            "type": "string",
+            "description": "Owned reservation code; requires apid. Empty clears the reservation link.",
+            "pattern": "^[A-Za-z0-9._-]{0,60}$"
+          },
+          "category": {
+            "type": "integer",
+            "description": "Transaction category; default 1.",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "hide_sv": {
+            "type": "boolean",
+            "description": "Hide from service users; default false."
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "id"
+        ],
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "type"
+            ]
+          },
+          {
+            "required": [
+              "amount"
+            ]
+          },
+          {
+            "required": [
+              "date"
+            ]
+          },
+          {
+            "required": [
+              "description"
+            ]
+          },
+          {
+            "required": [
+              "apid"
+            ]
+          },
+          {
+            "required": [
+              "rcode"
+            ]
+          },
+          {
+            "required": [
+              "category"
+            ]
+          },
+          {
+            "required": [
+              "hide_sv"
+            ]
+          }
+        ]
+      },
+      "description": "Update supplied fields of an unlinked manual current-account transaction.",
+      "group": "current-account",
+      "businessRules": [
+        "Supply at least one editable field. Omitted fields remain unchanged; the stable id never changes when the date is edited. A supplied reservation can reuse the saved property; an empty rcode removes the reservation link.",
+        "Only origin=manual with no saved document reference is editable. Automatically generated or linked movements return 409 immutable_transaction."
+      ]
+    },
+    "deleteCurrentAccountTransaction": {
+      "name": "deleteCurrentAccountTransaction",
+      "method": "DELETE",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "invoicing_nif": {
+            "type": "string",
+            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
+            "pattern": "^[A-Za-z0-9._-]{1,20}$"
+          },
+          "id": {
+            "type": "integer",
+            "description": "Numeric resource/document identity.",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "invoicing_nif",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Delete an unlinked manual current-account transaction.",
+      "group": "current-account",
+      "businessRules": [
+        "Only origin=manual with no saved document reference can be deleted. Automatically generated or linked movements return 409 immutable_transaction.",
+        "The stable id is scoped to the authenticated account and invoicing_nif. Deletion is permanent and changes subsequent balances."
+      ]
+    },
     "getRentalContracts": {
       "name": "getRentalContracts",
       "method": "GET",
@@ -4766,6 +5578,52 @@
       "invoicing_nif": "123456789",
       "year": 2026,
       "month": 10
+    },
+    "addModelo30Transaction": {
+      "invoicing_nif": "123456789",
+      "beneficiary_nif": "123456789",
+      "foreign_nif": "EXAMPLE123",
+      "country": "826",
+      "income_type": "08",
+      "taxation": "02",
+      "amount": "100.00",
+      "type": "U",
+      "year": 2026,
+      "month": 10
+    },
+    "getCustomers": {
+      "invoicing_nif": "123456789"
+    },
+    "addCustomer": {
+      "invoicing_nif": "123456789",
+      "nif": "123456789",
+      "name": "Example Person",
+      "country": "PT"
+    },
+    "deleteCustomer": {
+      "invoicing_nif": "123456789",
+      "customer_id": "123456789"
+    },
+    "getCurrentAccount": {
+      "invoicing_nif": "123456789",
+      "date_start": 1790812800,
+      "date_end": 1793491199
+    },
+    "addCurrentAccountTransaction": {
+      "invoicing_nif": "123456789",
+      "type": "C",
+      "amount": "100.00",
+      "date": 1790812800,
+      "description": "Example manual credit"
+    },
+    "updateCurrentAccountTransaction": {
+      "invoicing_nif": "123456789",
+      "id": 1,
+      "description": "Updated manual transaction"
+    },
+    "deleteCurrentAccountTransaction": {
+      "invoicing_nif": "123456789",
+      "id": 1
     },
     "getRentalContracts": {
       "apid": 123
