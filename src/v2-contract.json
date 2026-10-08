@@ -4931,6 +4931,99 @@
         "additionalProperties": false
       }
     },
+    "submitCityTaxDeclaration": {
+      "name": "submitCityTaxDeclaration",
+      "method": "POST",
+      "scope": "account",
+      "permission": "write",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "license_number": {
+            "type": "string",
+            "description": "One numeric registration number configured in the authenticated account.",
+            "pattern": "^[0-9]+$",
+            "maxLength": 128
+          },
+          "year": {
+            "type": "integer",
+            "description": "Calendar year.",
+            "minimum": 1000,
+            "maximum": 9999
+          },
+          "month": {
+            "type": "string",
+            "description": "Declared month (\"9\" or \"09\") or quarter (\"1T\", \"2T\", \"3T\", \"4T\"); not the sending month.",
+            "pattern": "^(0?[1-9]|1[0-2]|[1-4]T)$"
+          }
+        },
+        "required": [
+          "license_number",
+          "year",
+          "month"
+        ],
+        "additionalProperties": false
+      },
+      "description": "Submit a city-tax declaration for a completed period using the registration's existing agent configuration.",
+      "group": "tmt",
+      "businessRules": [
+        "Requires an existing, active city-tax agent and complete provider credentials. The API never creates or changes agent configuration. Monthly requests require configured period 1; quarterly requests require period 2. A mismatch returns HTTP 409 period_mismatch before submission.",
+        "The registration and every member of a merged declaration must belong to the authenticated account, have active properties and the city-tax module enabled. Conflicting providers or group configurations are rejected. No apid, source selector or municipal credentials are accepted.",
+        "The declared period must have ended. Calculations and configured grouping follow the application submission flow. Selecting a merged member submits the entire configured group, not a separate declaration.",
+        "Existing declarations for the registration/group and period return HTTP 409 declaration_exists. Another account submission in progress returns operation_in_progress. Do not run a manual application submission concurrently with this operation.",
+        "Returns the saved uniqid, source, license_number, year, month and status. submitted means accepted for processing; municipal submission can still be pending, and it does not mean paid or settled. Poll getCityTaxDeclarations using uniqid for the current declaration state.",
+        "An uncertain external or persistence outcome returns HTTP 503 citytax_submission_uncertain. A later attempt is blocked with submission_reconciliation_required until the outcome is reconciled. Never automatically repeat a submission after a timeout or uncertain response."
+      ],
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "uniqid": {
+            "type": "string",
+            "description": "Opaque declaration identity from the selected source.",
+            "pattern": "^[A-Za-z0-9._-]+$",
+            "maxLength": 128
+          },
+          "source": {
+            "type": "string",
+            "description": "Declaration source; part of its identity.",
+            "enum": [
+              "tmtai",
+              "itaxas"
+            ]
+          },
+          "license_number": {
+            "type": "string",
+            "description": "Registration number or the full configured merged group."
+          },
+          "year": {
+            "type": "integer",
+            "description": "Calendar year.",
+            "minimum": 1000,
+            "maximum": 9999
+          },
+          "month": {
+            "type": "string",
+            "description": "Declared month or quarter."
+          },
+          "status": {
+            "type": "string",
+            "description": "Submission accepted; read the declaration for subsequent state.",
+            "enum": [
+              "submitted"
+            ]
+          }
+        },
+        "required": [
+          "uniqid",
+          "source",
+          "license_number",
+          "year",
+          "month",
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
     "getUsers": {
       "name": "getUsers",
       "method": "GET",
@@ -5660,6 +5753,11 @@
       "id": 1
     },
     "getCityTaxDeclarations": {},
+    "submitCityTaxDeclaration": {
+      "license_number": "12345",
+      "year": 2026,
+      "month": "09"
+    },
     "getUsers": {},
     "addUser": {
       "email": "service@example.invalid",
