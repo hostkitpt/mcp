@@ -5632,15 +5632,18 @@
           "vat": "23",
           "reason_code": ""
         }
-      ]
+      ],
+      "invoice_type": "FR"
     },
     "closeInvoice": {
       "invoicing_nif": "123456789",
-      "id": 1
+      "id": 1,
+      "invoice_type": "FR"
     },
     "deleteInvoice": {
       "invoicing_nif": "123456789",
-      "id": 1
+      "id": 1,
+      "invoice_type": "FR"
     },
     "addReceipt": {
       "invoicing_nif": "123456789",
@@ -5650,7 +5653,8 @@
     "addCreditNote": {
       "invoicing_nif": "123456789",
       "refseries": "EXAMPLE",
-      "refid": 1
+      "refid": 1,
+      "invoice_type": "FR"
     },
     "generateSAFT": {
       "invoicing_nif": "123456789",
