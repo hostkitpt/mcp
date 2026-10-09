@@ -3190,7 +3190,12 @@
       },
       "legacy": "addCreditNote",
       "description": "Create a credit note for a closed invoice.",
-      "group": "invoices"
+      "group": "invoices",
+      "businessRules": [
+        "For Portuguese accounts, a missing credit note ATCUD is registered with AT before issuing the credit note. The registration remains saved if credit note creation fails.",
+        "FR and FT documents with the same series share its NC registration. Receipt (RG) registration codes are never used for credit notes.",
+        "If AT registration has an uncertain outcome, reconcile the series in Hostkit before retrying; the API does not repeat that registration automatically."
+      ]
     },
     "generateSAFT": {
       "name": "generateSAFT",
