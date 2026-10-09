@@ -3023,96 +3023,46 @@
         "additionalProperties": false
       },
       "legacy": "addInvoice",
-      "description": "Create a draft fiscal invoice with one or more lines in a single atomic request; rcode is optional. Close it explicitly with closeInvoice.",
+      "description": "Create and finalize a fiscal invoice with one or more lines in a single atomic request; rcode is optional.",
       "group": "invoices",
       "businessRules": [
         "When rcode is supplied, require apid and verify the reservation belongs to that property/account.",
-        "Validate authorized NIF/series. lines is required and contains 1 to 20 lines within the 8192-byte body limit. The draft and all lines are committed together; any line failure rolls back the complete creation. Closing is always explicit."
-      ]
-    },
-    "closeInvoice": {
-      "name": "closeInvoice",
-      "method": "PATCH",
-      "scope": "account",
-      "permission": "write",
-      "schema": {
+        "Validate authorized NIF/series. lines is required and contains 1 to 20 lines within the 8192-byte body limit. Creation, all lines and finalization complete before a single commit; any line, signing or finalization failure rolls back the complete creation.",
+        "A successful request returns a closed invoice. Invoice type defaults to FR; use FT for an invoice. Closed documents cannot be edited or deleted through the API; use addCreditNote when appropriate.",
+        "Confirm the result before retrying after a timeout or commit_uncertain; the invoice may already have been issued."
+      ],
+      "responseSchema": {
         "type": "object",
         "properties": {
-          "invoicing_nif": {
+          "status": {
             "type": "string",
-            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
-            "pattern": "^[A-Za-z0-9._-]{1,64}$"
-          },
-          "series": {
-            "type": "string",
-            "description": "Document series; omission uses the configured default series."
+            "description": "Operation result.",
+            "enum": [
+              "success"
+            ]
           },
           "id": {
-            "type": "integer",
-            "description": "Numeric resource/document identity.",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "invoice_type": {
             "type": "string",
-            "description": "Invoice type; default FR.",
-            "enum": [
-              "FR",
-              "FT"
-            ]
+            "description": "Issued invoice number.",
+            "pattern": "^[0-9]+$"
+          },
+          "invoice_token": {
+            "type": "string",
+            "description": "Invoice document token."
+          },
+          "invoice_url": {
+            "type": "string",
+            "description": "Invoice document URL."
           }
         },
         "required": [
-          "invoicing_nif",
-          "id"
+          "status",
+          "id",
+          "invoice_token",
+          "invoice_url"
         ],
         "additionalProperties": false
-      },
-      "legacy": "closeInvoice",
-      "description": "Explicitly finalize an open fiscal invoice; verify data and totals first.",
-      "group": "invoices"
-    },
-    "deleteInvoice": {
-      "name": "deleteInvoice",
-      "method": "DELETE",
-      "scope": "account",
-      "permission": "write",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "invoicing_nif": {
-            "type": "string",
-            "description": "Explicit invoicing VAT ID; the backend must verify account authorization.",
-            "pattern": "^[A-Za-z0-9._-]{1,64}$"
-          },
-          "series": {
-            "type": "string",
-            "description": "Document series; omission uses the configured default series."
-          },
-          "id": {
-            "type": "integer",
-            "description": "Numeric resource/document identity.",
-            "minimum": 1,
-            "maximum": 9007199254740991
-          },
-          "invoice_type": {
-            "type": "string",
-            "description": "Invoice type; default FR.",
-            "enum": [
-              "FR",
-              "FT"
-            ]
-          }
-        },
-        "required": [
-          "invoicing_nif",
-          "id"
-        ],
-        "additionalProperties": false
-      },
-      "legacy": "deleteInvoice",
-      "description": "Delete an open invoice only when the fiscal workflow permits it.",
-      "group": "invoices"
+      }
     },
     "addReceipt": {
       "name": "addReceipt",
@@ -5633,16 +5583,6 @@
           "reason_code": ""
         }
       ],
-      "invoice_type": "FR"
-    },
-    "closeInvoice": {
-      "invoicing_nif": "123456789",
-      "id": 1,
-      "invoice_type": "FR"
-    },
-    "deleteInvoice": {
-      "invoicing_nif": "123456789",
-      "id": 1,
       "invoice_type": "FR"
     },
     "addReceipt": {
