@@ -50,7 +50,7 @@ Review write, destructive and fiscal operations before invoking them. The client
 
 `addExpense` and `addInvoice` require a `lines` array with 1 to 20 lines. The document and all lines are created together; a line failure rolls back the complete creation. The signed JSON body must fit 8192 bytes.
 
-Invoices remain drafts until explicitly finalized with `closeInvoice`. Separate line-creation tools are not available in API v2.
+`addInvoice` finalizes the invoice before committing and returns its `id`, `invoice_token` and `invoice_url`. Signing or finalization failures roll back the complete creation. Separate line-creation, invoice-closing and invoice-deletion tools are not available in API v2. Use a credit note when a closed invoice needs to be reversed.
 
 ## Invoicing
 
